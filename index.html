@@ -44,6 +44,7 @@
       color: #d9534f;
       font-size: 1.6rem;
       font-weight: 700;
+      cursor: pointer;
     }
 
     .nav-links {
@@ -475,11 +476,11 @@
 
   <!-- Barre de navigation -->
   <header class="navbar">
-    <div class="logo">
+    <div class="logo" onclick="goAccueil()">
       <h1>Les Recettes 2 Pat'</h1>
     </div>
     <ul class="nav-links">
-      <li><a href="#" class="active">Accueil</a></li>
+      <li><a href="#" class="active" onclick="goAccueil(event)">Accueil</a></li>
       <li><button class="btn-admin-toggle" onclick="handleAdminClick()">⚙️ Admin</button></li>
     </ul>
   </header>
@@ -625,6 +626,7 @@
       appId: "1:900183636735:web:e74451fb0a58b0c529eaca"
     };
 
+    // Initialisation de Firebase & Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const recipesCollection = collection(db, "recipes");
@@ -635,6 +637,22 @@
     let currentCategory = 'Toutes';
 
     // --------------------------------------------------------------------------
+    // NAVIGATION & GESTION DE L'AFFICHAGE D'ACCUEIL
+    // --------------------------------------------------------------------------
+    window.goAccueil = function(e) {
+      if (e) e.preventDefault();
+      
+      // Masquer le panneau d'administration
+      document.getElementById('adminPanel').classList.remove('active');
+      
+      // Réinitialiser le formulaire d'édition
+      resetForm();
+      
+      // Retourner en haut de la page avec animation douce
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // --------------------------------------------------------------------------
     // GESTION DU CODE PIN FIRESTORE (LECTURE & CRÉATION PAR DÉFAUT "1234")
     // --------------------------------------------------------------------------
     async function getAdminPin() {
@@ -643,7 +661,7 @@
         if (configSnap.exists()) {
           return configSnap.data().pin;
         } else {
-          // Si la configuration n'existe pas encore, création avec PIN "1234" par défaut
+          // Si la configuration n'existe pas encore, création avec le PIN "1234" par défaut
           const defaultPin = "1234";
           await setDoc(configDocRef, { pin: defaultPin }, { merge: true });
           return defaultPin;
@@ -704,7 +722,7 @@
         alert("Code PIN mis à jour avec succès dans Firebase ! Il est désormais synchronisé sur tous vos appareils.");
       } catch (e) {
         console.error("Erreur détaillée lors de la modification du PIN :", e);
-        alert("Erreur lors de la modification du PIN sur Firebase. Vérifiez les règles Firestore.");
+        alert("Erreur lors de la modification du PIN sur Firebase. N'oubliez pas de mettre à jour les règles Firestore.");
       }
     };
 
