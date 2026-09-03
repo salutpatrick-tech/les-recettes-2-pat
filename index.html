@@ -643,14 +643,14 @@
         if (configSnap.exists()) {
           return configSnap.data().pin;
         } else {
-          // Création initiale si le document n'existe pas encore dans Firestore
+          // Si la configuration n'existe pas encore, création avec PIN "1234" par défaut
           const defaultPin = "1234";
-          await setDoc(configDocRef, { pin: defaultPin });
+          await setDoc(configDocRef, { pin: defaultPin }, { merge: true });
           return defaultPin;
         }
       } catch (e) {
         console.error("Erreur lors de la récupération du PIN sur Firestore :", e);
-        return "1234"; // Valeur de secours
+        return "1234";
       }
     }
 
@@ -684,7 +684,7 @@
       const currentPin = await getAdminPin();
       const pinActuel = prompt("Saisis ton code PIN actuel :");
       
-      if (pinActuel === null) return; // Annulation
+      if (pinActuel === null) return;
 
       if (pinActuel !== currentPin) {
         alert("Code PIN actuel incorrect !");
@@ -703,8 +703,8 @@
         await setDoc(configDocRef, { pin: nouveauPin.trim() }, { merge: true });
         alert("Code PIN mis à jour avec succès dans Firebase ! Il est désormais synchronisé sur tous vos appareils.");
       } catch (e) {
-        console.error("Erreur lors du changement de PIN :", e);
-        alert("Erreur lors de la modification du PIN sur Firebase.");
+        console.error("Erreur détaillée lors de la modification du PIN :", e);
+        alert("Erreur lors de la modification du PIN sur Firebase. Vérifiez les règles Firestore.");
       }
     };
 
