@@ -616,7 +616,7 @@
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuration Firebase dédiée au projet "les-recettes-2-pat"
+    // Configuration Firebase dédiée au projet
     const firebaseConfig = {
       apiKey: "AIzaSyB5YWY1ECkbJod1swg6ytEnMbnUhEjonkY",
       authDomain: "les-recettes-2-pat.firebaseapp.com",
@@ -691,6 +691,10 @@
         isAdminAuthenticated = true;
         document.getElementById('pinModal').classList.remove('active');
         document.getElementById('adminPanel').classList.add('active');
+        
+        // Rafraîchir les cartes pour afficher les boutons d'édition/suppression
+        chargerRecettes();
+        
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         document.getElementById('pinError').style.display = 'block';
@@ -719,10 +723,10 @@
 
       try {
         await setDoc(configDocRef, { pin: nouveauPin.trim() }, { merge: true });
-        alert("Code PIN mis à jour avec succès dans Firebase ! Il est désormais synchronisé sur tous vos appareils.");
+        alert("Code PIN mis à jour avec succès dans Firebase !");
       } catch (e) {
         console.error("Erreur détaillée lors de la modification du PIN :", e);
-        alert("Erreur lors de la modification du PIN sur Firebase. N'oubliez pas de mettre à jour les règles Firestore.");
+        alert("Erreur lors de la modification du PIN sur Firebase.");
       }
     };
 
@@ -733,6 +737,10 @@
     window.logoutAdmin = function() {
       isAdminAuthenticated = false;
       document.getElementById('adminPanel').classList.remove('active');
+      
+      // Rafraîchir les cartes pour masquer les boutons d'édition/suppression
+      chargerRecettes();
+      
       alert("Déconnexion de l'administration réussie.");
     };
 
@@ -885,6 +893,13 @@
           loadedRecipes.push(recipeObj);
 
           const defaultImg = 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=500&q=80';
+          
+          // N'afficher les boutons Édition et Suppression que si le mode Admin est actif
+          const adminButtons = isAdminAuthenticated ? `
+            <button class="btn-edit" onclick="editerRecette('${docSnap.id}')">✏️</button>
+            <button class="btn-delete" onclick="supprimerRecette('${docSnap.id}')">🗑️</button>
+          ` : '';
+
           const cardHTML = `
             <article class="recipe-card" data-category="${data.categorie}">
               <span class="card-badge">${data.categorie}</span>
@@ -895,8 +910,7 @@
                 <p>${data.ingredients ? data.ingredients.slice(0, 3).join(', ') + '...' : ''}</p>
                 <div class="card-actions">
                   <button class="btn-view" onclick="ouvrirRecette('${docSnap.id}')">Voir</button>
-                  <button class="btn-edit" onclick="editerRecette('${docSnap.id}')">✏️</button>
-                  <button class="btn-delete" onclick="supprimerRecette('${docSnap.id}')">🗑️</button>
+                  ${adminButtons}
                 </div>
               </div>
             </article>
