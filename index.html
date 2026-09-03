@@ -298,6 +298,16 @@
       border-bottom: 2px solid #eee;
     }
 
+    .btn-logout {
+      background-color: #7f8c8d;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
     .admin-form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -351,7 +361,7 @@
     }
 
     /* ==========================================
-       7. MODALE DE DÉTAIL & EXPORT PDF
+       7. MODALES (DÉTAILS & CODE PIN)
        ========================================== */
     .modal-overlay {
       display: none;
@@ -378,6 +388,33 @@
       overflow-y: auto;
       padding: 2rem;
       position: relative;
+    }
+
+    .pin-modal-content {
+      background: white;
+      border-radius: 10px;
+      max-width: 380px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .pin-input {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1.4rem;
+      text-align: center;
+      letter-spacing: 0.5rem;
+      margin: 1rem 0;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .pin-input:focus {
+      border-color: #2c3e50;
+      outline: none;
     }
 
     .modal-close {
@@ -413,7 +450,7 @@
     </div>
     <ul class="nav-links">
       <li><a href="#" class="active">Accueil</a></li>
-      <li><button class="btn-admin-toggle" onclick="toggleAdmin()">⚙️ Admin</button></li>
+      <li><button class="btn-admin-toggle" onclick="handleAdminClick()">⚙️ Admin</button></li>
     </ul>
   </header>
 
@@ -427,6 +464,7 @@
   <section class="admin-panel" id="adminPanel">
     <div class="admin-header">
       <h3 id="formTitle">🛠️ Ajouter une nouvelle recette</h3>
+      <button class="btn-logout" onclick="logoutAdmin()">🔒 Déconnexion</button>
     </div>
 
     <form id="recipeForm">
@@ -494,6 +532,18 @@
     </div>
   </main>
 
+  <!-- Modale de demande de PIN -->
+  <div class="modal-overlay" id="pinModal">
+    <div class="pin-modal-content">
+      <button class="modal-close" onclick="fermerPinModal()">&times;</button>
+      <h3>🔒 Accès Administration</h3>
+      <p style="font-size:0.9rem; color:#666; margin-top:0.5rem;">Saisis ton code PIN pour accéder à l'interface d'édition :</p>
+      <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••">
+      <p id="pinError" style="color:#d9534f; font-size:0.85rem; display:none; margin-bottom:0.8rem;">Code PIN incorrect !</p>
+      <button class="btn-submit" style="width:100%;" onclick="verifierPin()">Valider</button>
+    </div>
+  </div>
+
   <!-- Modale de détail -->
   <div class="modal-overlay" id="recipeModal">
     <div class="modal-content">
@@ -544,11 +594,46 @@
     const db = getFirestore(app);
     const recipesCollection = collection(db, "recipes");
 
+    // CODE PIN D'ACCÈS (Tu peux changer "1234" par le code de ton choix)
+    const ADMIN_PIN = "1234";
+    let isAdminAuthenticated = false;
+
     let loadedRecipes = [];
     let currentCategory = 'Toutes';
 
-    window.toggleAdmin = function() {
-      document.getElementById('adminPanel').classList.toggle('active');
+    // GESTION DU CODE PIN & ADMINISTRATION
+    window.handleAdminClick = function() {
+      if (isAdminAuthenticated) {
+        document.getElementById('adminPanel').classList.toggle('active');
+      } else {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').style.display = 'none';
+        document.getElementById('pinModal').classList.add('active');
+        document.getElementById('pinInput').focus();
+      }
+    };
+
+    window.verifierPin = function() {
+      const pinSaisi = document.getElementById('pinInput').value;
+      if (pinSaisi === ADMIN_PIN) {
+        isAdminAuthenticated = true;
+        document.getElementById('pinModal').classList.remove('active');
+        document.getElementById('adminPanel').classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        document.getElementById('pinError').style.display = 'block';
+        document.getElementById('pinInput').value = '';
+      }
+    };
+
+    window.fermerPinModal = function() {
+      document.getElementById('pinModal').classList.remove('active');
+    };
+
+    window.logoutAdmin = function() {
+      isAdminAuthenticated = false;
+      document.getElementById('adminPanel').classList.remove('active');
+      alert("Déconnexion réussie !");
     };
 
     window.fermerRecette = function() {
@@ -610,6 +695,11 @@
     }
 
     window.editerRecette = function(id) {
+      if (!isAdminAuthenticated) {
+        window.handleAdminClick();
+        return;
+      }
+
       const recipe = loadedRecipes.find(r => r.id === id);
       if (!recipe) return;
 
@@ -630,6 +720,11 @@
     };
 
     window.supprimerRecette = async function(id) {
+      if (!isAdminAuthenticated) {
+        window.handleAdminClick();
+        return;
+      }
+
       if (confirm("Es-tu sûr de vouloir supprimer cette recette ?")) {
         try {
           await deleteDoc(doc(db, "recipes", id));
@@ -738,6 +833,13 @@
       } catch (error) {
         console.error("Erreur lors de l'enregistrement :", error);
         alert("Erreur lors de l'enregistrement.");
+      }
+    });
+
+    // Écouter la touche Entrée dans la modale du PIN
+    document.getElementById('pinInput').addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        verifierPin();
       }
     });
 
