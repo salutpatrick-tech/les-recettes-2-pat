@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Les Recettes 2 Pat'</title>
+  
+  <!-- Bibliothèque externe pour l'export PDF des recettes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* ==========================================
+       1. STYLES GÉNÉRAUX & REINITIALISATION
+       ========================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       2. BARRE DE NAVIGATION (NAVBAR)
+       ========================================== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo h1 {
+      color: #d9534f;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #555;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: #d9534f;
+    }
+
+    .btn-admin-toggle {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
+
+    .btn-admin-toggle:hover {
+      background-color: #1a252f;
+    }
+
+    /* ==========================================
+       3. BANNIÈRE EN-TÊTE (HERO)
+       ========================================== */
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), 
+                  url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+      color: white;
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+
+    .hero h2 {
+      font-size: 2.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    /* ==========================================
+       4. CONTROLES : RECHERCHE ET FILTRES
+       ========================================== */
+    .controls-section {
+      max-width: 1200px;
+      margin: 2rem auto 1rem;
+      padding: 0 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-box input {
+      padding: 0.8rem 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 380px;
+      max-width: 100%;
+      font-size: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: #d9534f;
+      box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
+    }
+
+    .filter-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tag-btn {
+      border: 1px solid #d9534f;
+      background: white;
+      color: #d9534f;
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .tag-btn:hover, .tag-btn.active {
+      background: #d9534f;
+      color: white;
+    }
+
+    /* ==========================================
+       5. GRILLE DE RECETTES (CARDS)
+       ========================================== */
+    .container {
+      max-width: 1200px;
+      margin: 1rem auto 3rem;
+      padding: 0 1rem;
+    }
+
+    .recipes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .recipe-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+
+    .recipe-card img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: #d9534f;
+      color: white;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.75rem;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .card-body h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      color: #2c3e50;
+    }
+
+    .card-meta {
+      font-size: 0.85rem;
+      color: #777;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-body p {
+      color: #555;
+      font-size: 0.9rem;
+      margin-bottom: 1.2rem;
+      flex-grow: 1;
+    }
+
+    .btn-view {
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+
+    .btn-view:hover {
+      background-color: #c9302c;
+    }
+
+    /* ==========================================
+       6. PANNEAU D'ADMINISTRATION (Saisie)
+       ========================================== */
+    .admin-panel {
+      display: none;
+      background: #ffffff;
+      border: 2px solid #2c3e50;
+      border-radius: 10px;
+      padding: 1.8rem;
+      margin: 2rem auto;
+      max-width: 1200px;
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid #eee;
+    }
+
+    .admin-header h3 {
+      color: #2c3e50;
+    }
+
+    .admin-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .btn-submit {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover {
+      background-color: #1a252f;
+    }
+
+    /* ==========================================
+       7. MODALE DE DÉTAIL & EXPORT PDF
+       ========================================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .modal-close:hover { color: #333; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .btn-pdf {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
+
+    .btn-pdf:hover {
+      background-color: #219150;
+    }
+
+    .recipe-detail-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .recipe-detail-header h2 {
+      color: #d9534f;
+      margin-bottom: 0.5rem;
+    }
+
+    .ingredients-list, .steps-list {
+      margin-left: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .ingredients-list li, .steps-list li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* ==========================================
+       8. PIED DE PAGE (FOOTER)
+       ========================================== */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background-color: #2c3e50;
+      color: white;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation principale -->
+  <header class="navbar">
+    <div class="logo">
+      <h1>Les Recettes 2 Pat'</h1>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" class="active">Accueil</a></li>
+      <li><a href="#">Entrées</a></li>
+      <li><a href="#">Plats</a></li>
+      <li><a href="#">Desserts</a></li>
+      <li><a href="#">Réglage Airfryer</a></li>
+      <li><button class="btn-admin-toggle" onclick="toggleAdmin()">⚙️ Admin</button></li>
+    </ul>
+  </header>
+
+  <!-- En-tête Hero -->
+  <section class="hero">
+    <h2>Bienvenue dans ma cuisine !</h2>
+    <p>Mes recettes maison, astuces de cuisson et tour de main au quotidien.</p>
+  </section>
+
+  <!-- Panneau d'administration (Ajout Firestore) -->
+  <section class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h3>🛠️ Espace Administration (Base de données)</h3>
+    </div>
+
+    <form id="addRecipeForm">
+      <h4>Ajouter une nouvelle recette :</h4>
+      <br>
+      <div class="admin-form-grid">
+        <div class="form-group">
+          <label>Titre de la recette</label>
+          <input type="text" id="recipeTitle" placeholder="ex: Poulet au Maroilles" required>
+        </div>
+        <div class="form-group">
+          <label>Catégorie</label>
+          <select id="recipeCategory" required>
+            <option value="Entrées">Entrées</option>
+            <option value="Plats">Plats</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Réglage Airfryer">Réglage Airfryer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Temps de préparation / cuisson</label>
+          <input type="text" id="recipeTime" placeholder="ex: 35 min" required>
+        </div>
+        <div class="form-group">
+          <label>Nombre de personnes</label>
+          <input type="text" id="recipeServings" placeholder="ex: 4 pers." required>
+        </div>
+        <div class="form-group full-width">
+          <label>Lien de l'image (URL photo)</label>
+          <input type="url" id="recipeImageUrl" placeholder="https://exemple.com/image.jpg">
+        </div>
+        <div class="form-group full-width">
+          <label>Ingrédients (un par ligne)</label>
+          <textarea id="recipeIngredients" rows="4" placeholder="4 cuisses de poulet&#10;200g de Maroilles&#10;20cl de crème fraîche" required></textarea>
+        </div>
+        <div class="form-group full-width">
+          <label>Étapes de préparation (une par ligne)</label>
+          <textarea id="recipeSteps" rows="5" placeholder="Faire revenir le poulet dans une sauteuse.&#10;Faire fondre le Maroilles avec la crème.&#10;Laisser mijoter 20 minutes à feu doux." required></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">➕ Enregistrer dans Firebase</button>
+    </form>
+  </section>
+
+  <!-- Zone de contrôle : Recherche & Filtres par catégorie -->
+  <section class="controls-section">
+    <div class="search-box">
+      <input type="text" placeholder="Rechercher une recette, un ingrédient..." id="searchInput">
+    </div>
+    <div class="filter-tags">
+      <button class="tag-btn active" data-category="Toutes">Toutes</button>
+      <button class="tag-btn" data-category="Entrées">Entrées</button>
+      <button class="tag-btn" data-category="Plats">Plats</button>
+      <button class="tag-btn" data-category="Desserts">Desserts</button>
+      <button class="tag-btn" data-category="Réglage Airfryer">Réglage Airfryer</button>
+    </div>
+  </section>
+
+  <!-- Conteneur d'affichage dynamique des cartes recettes -->
+  <main class="container">
+    <div class="recipes-grid" id="recipesGrid">
+      <p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>
+    </div>
+  </main>
+
+  <!-- Modale pour consulter la recette et l'imprimer en PDF -->
+  <div class="modal-overlay" id="recipeModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="fermerRecette()">&times;</button>
+      
+      <div class="modal-actions">
+        <button class="btn-pdf" onclick="telechargerPDF()">📄 Télécharger en PDF</button>
+      </div>
+
+      <div id="pdf-container">
+        <div class="recipe-detail-header">
+          <h2 id="modalTitre">Titre de la recette</h2>
+          <div class="card-meta" id="modalMeta">Temps | Personnes | Catégorie</div>
+        </div>
+        
+        <h4>Ingrédients :</h4>
+        <ul class="ingredients-list" id="modalIngredients"></ul>
+
+        <h4>Préparation :</h4>
+        <ol class="steps-list" id="modalEtapes"></ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pied de page -->
+  <footer>
+    <p>&copy; 2026 Les Recettes 2 Pat' — Tous droits réservés</p>
+  </footer>
+
+  <!-- INTEGRATION JAVASCRIPT & FIREBASE FIRESTORE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 1. CONFIGURATION FIREBASE EXACTE DE LES-RECETTES-2-PAT
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5YWY1ECkbJod1swg6ytEnMbnUhEjonkY",
+      authDomain: "les-recettes-2-pat.firebaseapp.com",
+      projectId: "les-recettes-2-pat",
+      storageBucket: "les-recettes-2-pat.firebasestorage.app",
+      messagingSenderId: "900183636735",
+      appId: "1:900183636735:web:e74451fb0a58b0c529eaca"
+    };
+
+    // Initialisation du SDK Firebase et de la collection Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const recipesCollection = collection(db, "recipes");
+
+    // Stockage local
+    let loadedRecipes = [];
+    let currentCategory = 'Toutes';
+
+    // Fonctions d'interface utilisateur
+    window.toggleAdmin = function() {
+      document.getElementById('adminPanel').classList.toggle('active');
+    };
+
+    window.fermerRecette = function() {
+      document.getElementById('recipeModal').classList.remove('active');
+    };
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('recipeModal');
+      if (event.target === modal) {
+        fermerRecette();
+      }
+    };
+
+    // Exportation du contenu en document PDF
+    window.telechargerPDF = function() {
+      const element = document.getElementById('pdf-container');
+      const titre = document.getElementById('modalTitre').innerText;
+
+      const options = {
+        margin:       10,
+        filename:     `${titre.toLowerCase().replace(/[^a-z0-9]/gi, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(options).from(element).save();
+    };
+
+    // Ouverture et affichage dynamique de la modale
+    window.ouvrirRecette = function(id) {
+      const recipe = loadedRecipes.find(r => r.id === id);
+      if (!recipe) return;
+
+      document.getElementById('modalTitre').innerText = recipe.titre;
+      document.getElementById('modalMeta').innerText = `⏱️ ${recipe.temps} | 👥 ${recipe.personnes} | Catégorie : ${recipe.categorie}`;
+
+      const ingredientsList = document.getElementById('modalIngredients');
+      ingredientsList.innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+
+      const stepsList = document.getElementById('modalEtapes');
+      stepsList.innerHTML = recipe.etapes.map(e => `<li>${e}</li>`).join('');
+
+      document.getElementById('recipeModal').classList.add('active');
+    };
+
+    // Logique de recherche et de filtrage par tag
+    function filterRecipes() {
+      const searchInput = document.getElementById('searchInput');
+      const query = searchInput.value.toLowerCase().trim();
+      const cards = document.querySelectorAll('.recipe-card');
+
+      cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const category = card.getAttribute('data-category');
+
+        const matchesQuery = title.includes(query);
+        const matchesCategory = (currentCategory === 'Toutes' || category === currentCategory);
+
+        if (matchesQuery && matchesCategory) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function initFilterEvents() {
+      const searchInput = document.getElementById('searchInput');
+      const tagButtons = document.querySelectorAll('.tag-btn');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', filterRecipes);
+      }
+
+      tagButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tagButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.getAttribute('data-category');
+          filterRecipes();
+        });
+      });
+    }
+
+    // Lecture des données en temps réel dans Firestore
+    async function chargerRecettes() {
+      const grid = document.getElementById('recipesGrid');
+      grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>';
+
+      try {
+        const snapshot = await getDocs(recipesCollection);
+        grid.innerHTML = '';
+        loadedRecipes = [];
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Aucune recette enregistrée pour le moment.</p>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const recipeObj = { id: docSnap.id, ...data };
+          loadedRecipes.push(recipeObj);
+
+          const defaultImg = 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=500&q=80';
+          const cardHTML = `
+            <article class="recipe-card" data-category="${data.categorie}">
+              <span class="card-badge">${data.categorie}</span>
+              <img src="${data.imageUrl || defaultImg}" alt="${data.titre}">
+              <div class="card-body">
+                <h3>${data.titre}</h3>
+                <div class="card-meta">⏱️ ${data.temps} | 👥 ${data.personnes}</div>
+                <p>${data.ingredients ? data.ingredients.slice(0, 3).join(', ') + '...' : ''}</p>
+                <button class="btn-view" onclick="ouvrirRecette('${docSnap.id}')">Voir la recette</button>
+              </div>
+            </article>
+          `;
+          grid.innerHTML += cardHTML;
+        });
+
+        initFilterEvents();
+      } catch (e) {
+        console.error("Erreur Firestore :", e);
+        grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1/-1;">Erreur lors du chargement des données. Assurez-vous que les règles Firestore sont bien configurées.</p>';
+      }
+    }
+
+    // Soumission du formulaire d'ajout vers Firestore
+    document.getElementById('addRecipeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nouvelleRecette = {
+        titre: document.getElementById('recipeTitle').value,
+        categorie: document.getElementById('recipeCategory').value,
+        temps: document.getElementById('recipeTime').value,
+        personnes: document.getElementById('recipeServings').value,
+        imageUrl: document.getElementById('recipeImageUrl').value,
+        ingredients: document.getElementById('recipeIngredients').value.split('\n').filter(i => i.trim() !== ''),
+        etapes: document.getElementById('recipeSteps').value.split('\n').filter(s => s.trim() !== ''),
+        createdAt: serverTimestamp()
+      };
+
+      try {
+        await addDoc(recipesCollection, nouvelleRecette);
+        alert("Recette ajoutée avec succès dans Firebase !");
+        document.getElementById('addRecipeForm').reset();
+        toggleAdmin();
+        chargerRecettes();
+      } catch (error) {
+        console.error("Erreur d'écriture Firestore :", error);
+        alert("Erreur lors de l'enregistrement dans la base de données.");
+      }
+    });
+
+    // Chargement initial au démarrage de la page
+    document.addEventListener('DOMContentLoaded', chargerRecettes);
+  </script>
+</body>
+</html>
