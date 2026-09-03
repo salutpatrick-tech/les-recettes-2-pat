@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Les Recettes 2 Pat'</title>
   
-  <!-- Bibliothèque externe pour l'export PDF des recettes -->
+  <!-- Bibliothèque externe pour l'exportation des recettes en PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* ==========================================
-       1. STYLES GÉNÉRAUX & REINITIALISATION
-       ========================================== */
+    /* ==========================================================================
+       1. STYLES GÉNÉRAUX ET RÉINITIALISATION
+       ========================================================================== */
     * {
       margin: 0;
       padding: 0;
@@ -25,16 +25,16 @@
       line-height: 1.6;
     }
 
-    /* ==========================================
+    /* ==========================================================================
        2. BARRE DE NAVIGATION (NAVBAR)
-       ========================================== */
+       ========================================================================== */
     .navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background-color: #ffffff;
       padding: 1rem 2rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -80,11 +80,11 @@
       background-color: #1a252f;
     }
 
-    /* ==========================================
-       3. BANNIÈRE EN-TÊTE (HERO)
-       ========================================== */
+    /* ==========================================================================
+       3. BANNIÈRE D'ACCUEIL (HERO)
+       ========================================================================== */
     .hero {
-      background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), 
+      background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), 
                   url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
       color: white;
       text-align: center;
@@ -101,9 +101,9 @@
       opacity: 0.9;
     }
 
-    /* ==========================================
-       4. CONTROLES : RECHERCHE ET FILTRES
-       ========================================== */
+    /* ==========================================================================
+       4. CONTRÔLES : RECHERCHE ET FILTRES
+       ========================================================================== */
     .controls-section {
       max-width: 1200px;
       margin: 2rem auto 1rem;
@@ -122,7 +122,7 @@
       width: 380px;
       max-width: 100%;
       font-size: 1rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -155,9 +155,9 @@
       color: white;
     }
 
-    /* ==========================================
-       5. GRILLE DE RECETTES (CARDS)
-       ========================================== */
+    /* ==========================================================================
+       5. GRILLE DES CARTES DE RECETTES
+       ========================================================================== */
     .container {
       max-width: 1200px;
       margin: 1rem auto 3rem;
@@ -174,7 +174,7 @@
       background: white;
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       position: relative;
       display: flex;
       flex-direction: column;
@@ -183,7 +183,7 @@
 
     .recipe-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
     .recipe-card img {
@@ -272,9 +272,9 @@
       cursor: pointer;
     }
 
-    /* ==========================================
+    /* ==========================================================================
        6. PANNEAU D'ADMINISTRATION
-       ========================================== */
+       ========================================================================== */
     .admin-panel {
       display: none;
       background: #ffffff;
@@ -296,6 +296,22 @@
       margin-bottom: 1.5rem;
       padding-bottom: 0.8rem;
       border-bottom: 2px solid #eee;
+    }
+
+    .admin-header-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-change-pin {
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .btn-logout {
@@ -360,9 +376,9 @@
       margin-left: 0.5rem;
     }
 
-    /* ==========================================
-       7. MODALES (DÉTAILS & CODE PIN)
-       ========================================== */
+    /* ==========================================================================
+       7. FENÊTRES MODALES (SÉCURITÉ PIN & DÉTAILS DE LA RECETTE)
+       ========================================================================== */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -398,7 +414,7 @@
       padding: 2rem;
       text-align: center;
       position: relative;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
     .pin-input {
@@ -427,6 +443,20 @@
       color: #888;
     }
 
+    .modal-actions {
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-pdf {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
     .ingredients-list, .steps-list {
       margin-left: 1.2rem;
       margin-bottom: 1.5rem;
@@ -443,7 +473,7 @@
 </head>
 <body>
 
-  <!-- Navigation principale -->
+  <!-- Barre de navigation -->
   <header class="navbar">
     <div class="logo">
       <h1>Les Recettes 2 Pat'</h1>
@@ -454,17 +484,20 @@
     </ul>
   </header>
 
-  <!-- Banner Hero -->
+  <!-- Bannière d'accueil -->
   <section class="hero">
     <h2>Bienvenue dans ma cuisine !</h2>
     <p>Mes recettes maison, astuces de cuisson et tour de main au quotidien.</p>
   </section>
 
-  <!-- Panneau d'administration (Ajout / Modification Firestore) -->
+  <!-- Panneau d'administration (Création, édition Firestore & gestion du PIN) -->
   <section class="admin-panel" id="adminPanel">
     <div class="admin-header">
       <h3 id="formTitle">🛠️ Ajouter une nouvelle recette</h3>
-      <button class="btn-logout" onclick="logoutAdmin()">🔒 Déconnexion</button>
+      <div class="admin-header-actions">
+        <button class="btn-change-pin" onclick="changerPin()">🔑 Changer le PIN</button>
+        <button class="btn-logout" onclick="logoutAdmin()">🔒 Déconnexion</button>
+      </div>
     </div>
 
     <form id="recipeForm">
@@ -472,11 +505,11 @@
 
       <div class="admin-form-grid">
         <div class="form-group">
-          <label>Titre de la recette</label>
+          <label for="recipeTitle">Titre de la recette</label>
           <input type="text" id="recipeTitle" placeholder="ex: Poulet au Maroilles" required>
         </div>
         <div class="form-group">
-          <label>Catégorie</label>
+          <label for="recipeCategory">Catégorie</label>
           <select id="recipeCategory" required>
             <option value="Entrées">Entrées</option>
             <option value="Plats">Plats</option>
@@ -485,23 +518,23 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Temps de préparation / cuisson</label>
+          <label for="recipeTime">Temps de préparation / cuisson</label>
           <input type="text" id="recipeTime" placeholder="ex: 35 min" required>
         </div>
         <div class="form-group">
-          <label>Nombre de personnes</label>
+          <label for="recipeServings">Nombre de personnes</label>
           <input type="text" id="recipeServings" placeholder="ex: 4 pers." required>
         </div>
         <div class="form-group full-width">
-          <label>Lien de l'image (URL photo)</label>
+          <label for="recipeImageUrl">Lien de l'image (URL photo)</label>
           <input type="url" id="recipeImageUrl" placeholder="https://exemple.com/image.jpg">
         </div>
         <div class="form-group full-width">
-          <label>Ingrédients (un par ligne)</label>
+          <label for="recipeIngredients">Ingrédients (un par ligne)</label>
           <textarea id="recipeIngredients" rows="4" placeholder="4 cuisses de poulet&#10;200g de Maroilles" required></textarea>
         </div>
         <div class="form-group full-width">
-          <label>Étapes de préparation (une par ligne)</label>
+          <label for="recipeSteps">Étapes de préparation (une par ligne)</label>
           <textarea id="recipeSteps" rows="5" placeholder="Faire revenir le poulet.&#10;Faire fondre le Maroilles." required></textarea>
         </div>
       </div>
@@ -511,7 +544,7 @@
     </form>
   </section>
 
-  <!-- Filtres & Recherche -->
+  <!-- Filtres et Recherche -->
   <section class="controls-section">
     <div class="search-box">
       <input type="text" placeholder="Rechercher une recette, un ingrédient..." id="searchInput">
@@ -525,14 +558,14 @@
     </div>
   </section>
 
-  <!-- Affichage des cartes recettes -->
+  <!-- Container principal d'affichage des recettes -->
   <main class="container">
     <div class="recipes-grid" id="recipesGrid">
       <p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>
     </div>
   </main>
 
-  <!-- Modale de demande de PIN -->
+  <!-- Fenêtre modale : Authentification par PIN -->
   <div class="modal-overlay" id="pinModal">
     <div class="pin-modal-content">
       <button class="modal-close" onclick="fermerPinModal()">&times;</button>
@@ -544,7 +577,7 @@
     </div>
   </div>
 
-  <!-- Modale de détail -->
+  <!-- Fenêtre modale : Affichage détaillé de la recette -->
   <div class="modal-overlay" id="recipeModal">
     <div class="modal-content">
       <button class="modal-close" onclick="fermerRecette()">&times;</button>
@@ -566,7 +599,7 @@
     <p>&copy; 2026 Les Recettes 2 Pat' — Tous droits réservés</p>
   </footer>
 
-  <!-- INTEGRATION JAVASCRIPT & FIREBASE FIRESTORE -->
+  <!-- SCRIPT FIREBASE & LOGIQUE APPLICATIVE (MODULE JS) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -574,13 +607,15 @@
       collection, 
       addDoc, 
       getDocs, 
+      getDoc, 
+      setDoc, 
       doc, 
       updateDoc, 
       deleteDoc, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuration Firebase exacte pour Les Recettes 2 Pat'
+    // Configuration Firebase dédiée au projet "les-recettes-2-pat"
     const firebaseConfig = {
       apiKey: "AIzaSyB5YWY1ECkbJod1swg6ytEnMbnUhEjonkY",
       authDomain: "les-recettes-2-pat.firebaseapp.com",
@@ -593,15 +628,32 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const recipesCollection = collection(db, "recipes");
+    const configDocRef = doc(db, "settings", "config");
 
-    // CODE PIN D'ACCÈS (Tu peux changer "1234" par le code de ton choix)
-    const ADMIN_PIN = "1234";
     let isAdminAuthenticated = false;
-
     let loadedRecipes = [];
     let currentCategory = 'Toutes';
 
-    // GESTION DU CODE PIN & ADMINISTRATION
+    // --------------------------------------------------------------------------
+    // GESTION DU CODE PIN FIRESTORE (LECTURE & CRÉATION PAR DÉFAUT "1234")
+    // --------------------------------------------------------------------------
+    async function getAdminPin() {
+      try {
+        const configSnap = await getDoc(configDocRef);
+        if (configSnap.exists()) {
+          return configSnap.data().pin;
+        } else {
+          // Création initiale si le document n'existe pas encore dans Firestore
+          const defaultPin = "1234";
+          await setDoc(configDocRef, { pin: defaultPin });
+          return defaultPin;
+        }
+      } catch (e) {
+        console.error("Erreur lors de la récupération du PIN sur Firestore :", e);
+        return "1234"; // Valeur de secours
+      }
+    }
+
     window.handleAdminClick = function() {
       if (isAdminAuthenticated) {
         document.getElementById('adminPanel').classList.toggle('active');
@@ -613,9 +665,11 @@
       }
     };
 
-    window.verifierPin = function() {
+    window.verifierPin = async function() {
       const pinSaisi = document.getElementById('pinInput').value;
-      if (pinSaisi === ADMIN_PIN) {
+      const currentPin = await getAdminPin();
+
+      if (pinSaisi === currentPin) {
         isAdminAuthenticated = true;
         document.getElementById('pinModal').classList.remove('active');
         document.getElementById('adminPanel').classList.add('active');
@@ -626,6 +680,34 @@
       }
     };
 
+    window.changerPin = async function() {
+      const currentPin = await getAdminPin();
+      const pinActuel = prompt("Saisis ton code PIN actuel :");
+      
+      if (pinActuel === null) return; // Annulation
+
+      if (pinActuel !== currentPin) {
+        alert("Code PIN actuel incorrect !");
+        return;
+      }
+
+      const nouveauPin = prompt("Entre ton nouveau code PIN (4 chiffres) :");
+      if (nouveauPin === null) return;
+
+      if (!nouveauPin || nouveauPin.trim().length < 4) {
+        alert("Le code PIN doit contenir au moins 4 chiffres.");
+        return;
+      }
+
+      try {
+        await setDoc(configDocRef, { pin: nouveauPin.trim() }, { merge: true });
+        alert("Code PIN mis à jour avec succès dans Firebase ! Il est désormais synchronisé sur tous vos appareils.");
+      } catch (e) {
+        console.error("Erreur lors du changement de PIN :", e);
+        alert("Erreur lors de la modification du PIN sur Firebase.");
+      }
+    };
+
     window.fermerPinModal = function() {
       document.getElementById('pinModal').classList.remove('active');
     };
@@ -633,9 +715,12 @@
     window.logoutAdmin = function() {
       isAdminAuthenticated = false;
       document.getElementById('adminPanel').classList.remove('active');
-      alert("Déconnexion réussie !");
+      alert("Déconnexion de l'administration réussie.");
     };
 
+    // --------------------------------------------------------------------------
+    // GESTION DES MODALES ET EXPORTATION PDF
+    // --------------------------------------------------------------------------
     window.fermerRecette = function() {
       document.getElementById('recipeModal').classList.remove('active');
     };
@@ -651,6 +736,9 @@
       }).from(element).save();
     };
 
+    // --------------------------------------------------------------------------
+    // FILTRES ET RECHERCHE EN TEMPS RÉEL
+    // --------------------------------------------------------------------------
     function filterRecipes() {
       const searchInput = document.getElementById('searchInput');
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -694,6 +782,9 @@
       });
     }
 
+    // --------------------------------------------------------------------------
+    // INTERACTION FIRESTORE (LECTURE, ÉDITION, SUPPRESSION RECETTES)
+    // --------------------------------------------------------------------------
     window.editerRecette = function(id) {
       if (!isAdminAuthenticated) {
         window.handleAdminClick();
@@ -725,14 +816,14 @@
         return;
       }
 
-      if (confirm("Es-tu sûr de vouloir supprimer cette recette ?")) {
+      if (confirm("Voulez-vous vraiment supprimer définitivement cette recette ?")) {
         try {
           await deleteDoc(doc(db, "recipes", id));
-          alert("Recette supprimée avec succès !");
+          alert("La recette a été supprimée.");
           chargerRecettes();
         } catch (e) {
           console.error("Erreur de suppression :", e);
-          alert("Erreur lors de la suppression.");
+          alert("Erreur lors de la suppression de la recette.");
         }
       }
     };
@@ -758,7 +849,7 @@
 
     async function chargerRecettes() {
       const grid = document.getElementById('recipesGrid');
-      grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chargement...</p>';
+      grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>';
 
       try {
         const snapshot = await getDocs(recipesCollection);
@@ -766,7 +857,7 @@
         loadedRecipes = [];
 
         if (snapshot.empty) {
-          grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Aucune recette enregistrée.</p>';
+          grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Aucune recette trouvée dans la base de données.</p>';
           return;
         }
 
@@ -798,10 +889,12 @@
         initFilterEvents();
 
       } catch (e) {
-        console.error("Erreur Firestore :", e);
+        console.error("Erreur de chargement Firestore :", e);
+        grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color:red;">Erreur lors du chargement des recettes.</p>';
       }
     }
 
+    // Envoi du formulaire (Création ou Mise à jour)
     document.getElementById('recipeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -828,21 +921,22 @@
         }
 
         resetForm();
-        toggleAdmin();
+        document.getElementById('adminPanel').classList.remove('active');
         chargerRecettes();
       } catch (error) {
-        console.error("Erreur lors de l'enregistrement :", error);
-        alert("Erreur lors de l'enregistrement.");
+        console.error("Erreur d'enregistrement :", error);
+        alert("Une erreur est survenue lors de l'enregistrement.");
       }
     });
 
-    // Écouter la touche Entrée dans la modale du PIN
+    // Écoute de la touche Entrée pour valider le PIN
     document.getElementById('pinInput').addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
         verifierPin();
       }
     });
 
+    // Chargement initial au lancement de la page
     document.addEventListener('DOMContentLoaded', chargerRecettes);
   </script>
 </body>
