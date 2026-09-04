@@ -505,11 +505,11 @@
 
   <!-- Bannière d'accueil -->
   <section class="hero">
-    2 Bienvenue dans ma cuisine !</h2>
+    <h2>Bienvenue dans ma cuisine !</h2>
     <p>Mes recettes maison, astuces de cuisson et tour de main au quotidien.</p>
   </section>
 
-  <!-- Panneau d'administration (Champs optionnels) -->
+  <!-- Panneau d'administration (Tous les champs sont optionnels) -->
   <section class="admin-panel" id="adminPanel">
     <div class="admin-header">
       <h3 id="formTitle">🛠️ Ajouter une nouvelle recette</h3>
@@ -635,7 +635,7 @@
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuration Firebase dédiée au projet Les Recettes 2 Pat'
+    // Configuration Firebase dédiée au projet Les Recettes 2 Pat' (distincte de banque-jeu)
     const firebaseConfig = {
       apiKey: "AIzaSyB5YWY1ECkbJod1swg6ytEnMbnUhEjonkY",
       authDomain: "les-recettes-2-pat.firebaseapp.com",
@@ -645,7 +645,7 @@
       appId: "1:900183636735:web:e74451fb0a58b0c529eaca"
     };
 
-    // Initialisation
+    // Initialisation Firebase & Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const recipesCollection = collection(db, "recipes");
