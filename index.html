@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Les Recettes 2 Pat'</title>
   
-  <!-- Bibliothèque externe pour l'exportation des recettes en PDF -->
+  <!-- Bibliothèque externe pour l'exportation des recettes et listes en PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
@@ -63,6 +63,16 @@
 
     .nav-links a:hover, .nav-links a.active {
       color: #d9534f;
+    }
+
+    .courses-badge {
+      background: #d9534f;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 7px;
+      font-size: 0.75rem;
+      display: none;
+      margin-left: 4px;
     }
 
     .btn-admin-toggle {
@@ -157,7 +167,7 @@
     }
 
     /* ==========================================================================
-       5. GRILLE DES CARTES DE RECETTES
+       5. CONTENEURS DES CARTES & SECTIONS DÉDIÉES
        ========================================================================== */
     .container {
       max-width: 1200px;
@@ -271,6 +281,39 @@
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
+    }
+
+    /* Section Liste de courses et Recettes à tester */
+    .custom-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .custom-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .custom-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-add-item {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: 8px;
     }
 
     /* ==========================================================================
@@ -396,7 +439,7 @@
     }
 
     /* ==========================================================================
-       7. FENÊTRES MODALES (SÉCURITÉ PIN & DÉTAILS DE LA RECETTE)
+       7. FENÊTRES MODALES (PIN & DÉTAILS RECETTE)
        ========================================================================== */
     .modal-overlay {
       display: none;
@@ -498,18 +541,24 @@
       <h1>Les Recettes 2 Pat'</h1>
     </div>
     <ul class="nav-links">
-      <li><a href="#" class="active" onclick="goAccueil(event)">Accueil</a></li>
+      <li><a href="#" id="linkAccueil" class="active" onclick="goAccueil(event)">Accueil</a></li>
+      <li>
+        <a href="#" id="linkCourses" onclick="afficherListeCourses(event)">
+          🛒 Liste de courses <span id="coursesBadge" class="courses-badge">0</span>
+        </a>
+      </li>
+      <li><a href="#" id="linkTester" onclick="afficherRecettesATester(event)">🧪 À tester</a></li>
       <li><button class="btn-admin-toggle" onclick="handleAdminClick()">⚙️ Admin</button></li>
     </ul>
   </header>
 
   <!-- Bannière d'accueil -->
-  <section class="hero">
+  <section class="hero" id="heroBanner">
     <h2>Bienvenue dans ma cuisine !</h2>
     <p>Mes recettes maison, astuces de cuisson et tour de main au quotidien.</p>
   </section>
 
-  <!-- Panneau d'administration (Tous les champs sont optionnels) -->
+  <!-- Panneau d'administration -->
   <section class="admin-panel" id="adminPanel">
     <div class="admin-header">
       <h3 id="formTitle">🛠️ Ajouter une nouvelle recette</h3>
@@ -565,7 +614,7 @@
   </section>
 
   <!-- Filtres et Recherche -->
-  <section class="controls-section">
+  <section class="controls-section" id="controlsSection">
     <div class="search-box">
       <input type="text" placeholder="Rechercher une recette, un ingrédient..." id="searchInput">
     </div>
@@ -578,14 +627,61 @@
     </div>
   </section>
 
-  <!-- Container principal d'affichage des recettes -->
-  <main class="container">
+  <!-- Container principal : Grille de recettes -->
+  <main class="container" id="mainContainer">
     <div class="recipes-grid" id="recipesGrid">
       <p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>
     </div>
   </main>
 
-  <!-- Fenêtre modale : Authentification par PIN -->
+  <!-- Section : Liste de courses -->
+  <section id="coursesSection" class="container" style="display: none;">
+    <div class="custom-box">
+      <div class="custom-header">
+        <h2>🛒 Ma liste de courses</h2>
+        <div class="custom-actions">
+          <button class="btn-pdf" onclick="telechargerPDFCourses()">📄 PDF Liste</button>
+          <button onclick="viderListeCourses()" style="background: #d9534f; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            🗑️ Tout effacer
+          </button>
+        </div>
+      </div>
+      
+      <div id="pdf-courses-container">
+        <ul id="listeCoursesUl" style="list-style: none; padding: 0;">
+          <!-- Les ingrédients ajoutés s'afficheront ici -->
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section : Recettes à tester -->
+  <section id="testerSection" class="container" style="display: none;">
+    <div class="custom-box">
+      <div class="custom-header">
+        <h2>🧪 Recettes à tester</h2>
+      </div>
+
+      <!-- Formulaire d'ajout (visible uniquement en mode Admin) -->
+      <div id="addTestRecipeForm" style="display: none; background: #f8f9fa; padding: 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+        <h4 style="margin-bottom: 0.8rem; color: #2c3e50;">➕ Ajouter un lien vers une recette externe</h4>
+        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+          <input type="text" id="testRecipeTitle" placeholder="Titre de la recette (ex: Tarte au citron Marmiton)" style="flex: 1; min-width: 200px; padding: 0.6rem; border: 1px solid #ccc; border-radius: 6px;">
+          <input type="url" id="testRecipeUrl" placeholder="https://exemple.com/recette" style="flex: 2; min-width: 250px; padding: 0.6rem; border: 1px solid #ccc; border-radius: 6px;">
+          <button onclick="ajouterRecetteATester()" style="background: #27ae60; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            Enregistrer
+          </button>
+        </div>
+      </div>
+
+      <!-- Liste des cartes de liens -->
+      <div id="testerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+        <p style="color: #777;">Chargement des recettes à tester...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fenêtre modale : Security PIN -->
   <div class="modal-overlay" id="pinModal">
     <div class="pin-modal-content">
       <button class="modal-close" onclick="fermerPinModal()">&times;</button>
@@ -597,7 +693,7 @@
     </div>
   </div>
 
-  <!-- Fenêtre modale : Affichage détaillé de la recette -->
+  <!-- Fenêtre modale : Détails de la recette -->
   <div class="modal-overlay" id="recipeModal">
     <div class="modal-content">
       <button class="modal-close" onclick="fermerRecette()">&times;</button>
@@ -619,7 +715,7 @@
     <p>&copy; 2026 Les Recettes 2 Pat' — Tous droits réservés</p>
   </footer>
 
-  <!-- SCRIPT FIREBASE & LOGIQUE APPLICATIVE (MODULE JS) -->
+  <!-- SCRIPT LOGIQUE JS & FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -635,7 +731,7 @@
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuration Firebase dédiée au projet Les Recettes 2 Pat' (distincte de banque-jeu)
+    // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyB5YWY1ECkbJod1swg6ytEnMbnUhEjonkY",
       authDomain: "les-recettes-2-pat.firebaseapp.com",
@@ -645,10 +741,11 @@
       appId: "1:900183636735:web:e74451fb0a58b0c529eaca"
     };
 
-    // Initialisation Firebase & Firestore
+    // Initialisation Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const recipesCollection = collection(db, "recipes");
+    const testRecipesCollection = collection(db, "recipes_to_test");
     const configDocRef = doc(db, "settings", "config");
 
     let isAdminAuthenticated = false;
@@ -656,17 +753,228 @@
     let currentCategory = 'Toutes';
 
     // --------------------------------------------------------------------------
-    // NAVIGATION & GESTION DE L'AFFICHAGE D'ACCUEIL
+    // NAVIGATION ET ROULEMENT DE VUES
     // --------------------------------------------------------------------------
     window.goAccueil = function(e) {
       if (e) e.preventDefault();
+      document.getElementById('coursesSection').style.display = 'none';
+      document.getElementById('testerSection').style.display = 'none';
+      document.getElementById('heroBanner').style.display = 'block';
+      document.getElementById('controlsSection').style.display = 'flex';
+      document.getElementById('mainContainer').style.display = 'block';
       document.getElementById('adminPanel').classList.remove('active');
+      
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.getElementById('linkAccueil').classList.add('active');
+      
       resetForm();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    window.afficherListeCourses = function(e) {
+      if (e) e.preventDefault();
+      document.getElementById('heroBanner').style.display = 'none';
+      document.getElementById('controlsSection').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('testerSection').style.display = 'none';
+      document.getElementById('adminPanel').classList.remove('active');
+
+      document.getElementById('coursesSection').style.display = 'block';
+
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.getElementById('linkCourses').classList.add('active');
+
+      rendreListeCourses();
+    };
+
+    window.afficherRecettesATester = function(e) {
+      if (e) e.preventDefault();
+      document.getElementById('heroBanner').style.display = 'none';
+      document.getElementById('controlsSection').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('coursesSection').style.display = 'none';
+      document.getElementById('adminPanel').classList.remove('active');
+
+      document.getElementById('testerSection').style.display = 'block';
+
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.getElementById('linkTester').classList.add('active');
+
+      const addForm = document.getElementById('addTestRecipeForm');
+      if (isAdminAuthenticated) {
+        addForm.style.display = 'block';
+      } else {
+        addForm.style.display = 'none';
+      }
+
+      chargerRecettesATester();
+    };
+
     // --------------------------------------------------------------------------
-    // SAUVEGARDE DE LA BASE DE DONNÉES (EXPORT JSON)
+    // GESTION LOCALSTORAGE (LISTE DE COURSES)
+    // --------------------------------------------------------------------------
+    function getCoursesStorage() {
+      return JSON.parse(localStorage.getItem('recettes_courses_list')) || [];
+    }
+
+    function mettreAJourBadge() {
+      const courses = getCoursesStorage();
+      const badge = document.getElementById('coursesBadge');
+      if (courses.length > 0) {
+        badge.innerText = courses.length;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    window.ajouterAuPanier = function(ingredient) {
+      let courses = getCoursesStorage();
+      if (!courses.includes(ingredient)) {
+        courses.push(ingredient);
+        localStorage.setItem('recettes_courses_list', JSON.stringify(courses));
+        mettreAJourBadge();
+        alert(`"${ingredient}" a été ajouté à ta liste de courses !`);
+      } else {
+        alert(`"${ingredient}" est déjà présent dans ta liste.`);
+      }
+    };
+
+    function rendreListeCourses() {
+      const courses = getCoursesStorage();
+      const ul = document.getElementById('listeCoursesUl');
+      
+      if (courses.length === 0) {
+        ul.innerHTML = '<li style="color:#777;">Ta liste de courses est vide. Clique sur les ingrédients d\'une recette pour en ajouter !</li>';
+      } else {
+        ul.innerHTML = courses.map((item, index) => `
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid #eee;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" style="transform: scale(1.2);">
+              <span>${item}</span>
+            </label>
+            <button onclick="retirerArticle(${index})" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 1.1rem;">❌</button>
+          </li>
+        `).join('');
+      }
+    }
+
+    window.retirerArticle = function(index) {
+      let courses = getCoursesStorage();
+      courses.splice(index, 1);
+      localStorage.setItem('recettes_courses_list', JSON.stringify(courses));
+      mettreAJourBadge();
+      rendreListeCourses();
+    };
+
+    window.viderListeCourses = function() {
+      if (confirm("Voulez-vous vraiment effacer toute la liste de courses ?")) {
+        localStorage.removeItem('recettes_courses_list');
+        mettreAJourBadge();
+        rendreListeCourses();
+      }
+    };
+
+    window.telechargerPDFCourses = function() {
+      const element = document.getElementById('pdf-courses-container');
+      html2pdf().set({
+        margin: 10,
+        filename: 'liste_de_courses.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    };
+
+    // --------------------------------------------------------------------------
+    // RECETTES À TESTER (FIRESTORE)
+    // --------------------------------------------------------------------------
+    async function chargerRecettesATester() {
+      const grid = document.getElementById('testerGrid');
+      grid.innerHTML = '<p style="color:#777;">Chargement...</p>';
+
+      try {
+        const snapshot = await getDocs(testRecipesCollection);
+        grid.innerHTML = '';
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<p style="color:#777; grid-column: 1/-1;">Aucune recette à tester pour le moment.</p>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const deleteBtn = isAdminAuthenticated ? `
+            <button onclick="supprimerRecetteATester('${docSnap.id}')" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 1.1rem;" title="Supprimer">
+              🗑️
+            </button>
+          ` : '';
+
+          const cardHTML = `
+            <div style="background: #fdfdfd; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+              <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 10px;">
+                <strong style="display: block; color: #2c3e50; font-size: 1rem; margin-bottom: 0.2rem;">${data.titre}</strong>
+                <a href="${data.url}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none; font-size: 0.85rem; word-break: break-all;">
+                  🔗 Ouvrir la recette ↗
+                </a>
+              </div>
+              ${deleteBtn}
+            </div>
+          `;
+          grid.innerHTML += cardHTML;
+        });
+
+      } catch (e) {
+        console.error("Erreur de chargement des recettes à tester :", e);
+        grid.innerHTML = '<p style="color:red; grid-column: 1/-1;">Erreur lors du chargement.</p>';
+      }
+    }
+
+    window.ajouterRecetteATester = async function() {
+      if (!isAdminAuthenticated) return;
+
+      const titreInput = document.getElementById('testRecipeTitle');
+      const urlInput = document.getElementById('testRecipeUrl');
+
+      const titre = titreInput.value.trim();
+      const url = urlInput.value.trim();
+
+      if (!titre || !url) {
+        alert("Merci de renseigner un titre et un lien URL valide.");
+        return;
+      }
+
+      try {
+        await addDoc(testRecipesCollection, {
+          titre: titre,
+          url: url,
+          createdAt: serverTimestamp()
+        });
+
+        titreInput.value = '';
+        urlInput.value = '';
+        chargerRecettesATester();
+      } catch (e) {
+        console.error("Erreur d'ajout :", e);
+        alert("Impossible d'ajouter le lien.");
+      }
+    };
+
+    window.supprimerRecetteATester = async function(id) {
+      if (!isAdminAuthenticated) return;
+
+      if (confirm("Supprimer ce lien de la liste ?")) {
+        try {
+          await deleteDoc(doc(db, "recipes_to_test", id));
+          chargerRecettesATester();
+        } catch (e) {
+          console.error("Erreur de suppression :", e);
+          alert("Impossible de supprimer le lien.");
+        }
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // EXPORT JSON BDD
     // --------------------------------------------------------------------------
     window.sauvegarderBDD = async function() {
       if (!isAdminAuthenticated) return;
@@ -701,7 +1009,7 @@
     };
 
     // --------------------------------------------------------------------------
-    // GESTION DU CODE PIN FIRESTORE
+    // GESTION PIN & ADMIN
     // --------------------------------------------------------------------------
     async function getAdminPin() {
       try {
@@ -714,7 +1022,7 @@
           return defaultPin;
         }
       } catch (e) {
-        console.error("Erreur lors de la récupération du PIN sur Firestore :", e);
+        console.error("Erreur de lecture du PIN :", e);
         return "1234";
       }
     }
@@ -738,6 +1046,13 @@
         isAdminAuthenticated = true;
         document.getElementById('pinModal').classList.remove('active');
         document.getElementById('adminPanel').classList.add('active');
+        
+        // Affichage des fonctionnalités admin si la page "À tester" est active
+        if (document.getElementById('testerSection').style.display === 'block') {
+          document.getElementById('addTestRecipeForm').style.display = 'block';
+          chargerRecettesATester();
+        }
+
         chargerRecettes();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -769,8 +1084,8 @@
         await setDoc(configDocRef, { pin: nouveauPin.trim() }, { merge: true });
         alert("Code PIN mis à jour avec succès dans Firebase !");
       } catch (e) {
-        console.error("Erreur détaillée lors de la modification du PIN :", e);
-        alert("Erreur lors de la modification du PIN sur Firebase.");
+        console.error("Erreur de modification du PIN :", e);
+        alert("Erreur lors de la modification du PIN.");
       }
     };
 
@@ -781,12 +1096,14 @@
     window.logoutAdmin = function() {
       isAdminAuthenticated = false;
       document.getElementById('adminPanel').classList.remove('active');
+      document.getElementById('addTestRecipeForm').style.display = 'none';
       chargerRecettes();
+      chargerRecettesATester();
       alert("Déconnexion de l'administration réussie.");
     };
 
     // --------------------------------------------------------------------------
-    // GESTION DES MODALES ET EXPORTATION PDF
+    // EXPORT PDF RECETTE
     // --------------------------------------------------------------------------
     window.fermerRecette = function() {
       document.getElementById('recipeModal').classList.remove('active');
@@ -804,7 +1121,7 @@
     };
 
     // --------------------------------------------------------------------------
-    // FILTRES ET RECHERCHE EN TEMPS RÉEL
+    // RECHERCHE & FILTRES
     // --------------------------------------------------------------------------
     function filterRecipes() {
       const searchInput = document.getElementById('searchInput');
@@ -850,7 +1167,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // INTERACTION FIRESTORE (LECTURE, ÉDITION, SUPPRESSION RECETTES)
+    // GESTION DES RECETTES (FIRESTORE)
     // --------------------------------------------------------------------------
     window.editerRecette = function(id) {
       if (!isAdminAuthenticated) {
@@ -915,7 +1232,15 @@
       document.getElementById('modalMeta').innerText = `⏱️ ${temps} | 👥 ${personnes} | Catégorie : ${categorie}`;
       
       if (recipe.ingredients && recipe.ingredients.length > 0) {
-        document.getElementById('modalIngredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+        document.getElementById('modalIngredients').innerHTML = recipe.ingredients.map(i => {
+          const ingEscaped = i.replace(/'/g, "\\'");
+          return `
+            <li style="margin-bottom:0.5rem;">
+              ${i} 
+              <button class="btn-add-item" onclick="ajouterAuPanier('${ingEscaped}')">➕ Panier</button>
+            </li>
+          `;
+        }).join('');
       } else {
         document.getElementById('modalIngredients').innerHTML = '<li><em>Aucun ingrédient renseigné</em></li>';
       }
@@ -989,7 +1314,7 @@
       }
     }
 
-    // Envoi du formulaire (Création ou Mise à jour)
+    // Formulaire d'ajout / modification de recette
     document.getElementById('recipeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -1024,15 +1349,18 @@
       }
     });
 
-    // Écoute de la touche Entrée pour valider le PIN
+    // Écoute de la touche Entrée pour la validation du PIN
     document.getElementById('pinInput').addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
         verifierPin();
       }
     });
 
-    // Chargement initial
-    document.addEventListener('DOMContentLoaded', chargerRecettes);
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      chargerRecettes();
+      mettreAJourBadge();
+    });
   </script>
 </body>
 </html>
