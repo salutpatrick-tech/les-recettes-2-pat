@@ -3,225 +3,232 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SITE DE RECETTES</title>
+  <title>Les Recettes 2 Pat'</title>
   
-  <style>
-    /* --- CSS GENERAL & DESIGN SYSTEM --- */
-    :root {
-      --primary-color: #e67e22;
-      --primary-hover: #d35400;
-      --bg-color: #f4f6f7;
-      --card-bg: #ffffff;
-      --text-color: #2c3e50;
-      --border-color: #e0e0e0;
-      --radius: 10px;
-    }
+  <!-- Bibliothèque externe pour l'exportation des recettes et listes en PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+  <style>
+    /* ==========================================================================
+       1. STYLES GÉNÉRAUX ET RÉINITIALISATION
+       ========================================================================== */
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      box-sizing: border-box;
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding-bottom: 50px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      line-height: 1.6;
     }
 
-    header {
-      background-color: var(--primary-color);
+    /* ==========================================================================
+       2. BARRE DE NAVIGATION (NAVBAR)
+       ========================================================================== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo h1 {
+      color: #d9534f;
+      font-size: 1.6rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #555;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: #d9534f;
+    }
+
+    .courses-badge {
+      background: #d9534f;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 7px;
+      font-size: 0.75rem;
+      display: none;
+      margin-left: 4px;
+    }
+
+    .btn-admin-toggle {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
+
+    .btn-admin-toggle:hover {
+      background-color: #1a252f;
+    }
+
+    /* ==========================================================================
+       3. BANNIÈRE D'ACCUEIL (HERO)
+       ========================================================================== */
+    .hero {
+      background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), 
+                  url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
       color: white;
       text-align: center;
-      padding: 2rem 1rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 4rem 1rem;
     }
 
-    header h1 {
-      font-size: 2.2rem;
+    .hero h2 {
+      font-size: 2.4rem;
       margin-bottom: 0.5rem;
     }
 
-    /* --- FILTRES & RECHERCHE --- */
-    .controls-container {
-      max-width: 1000px;
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    /* ==========================================================================
+       4. CONTRÔLES : RECHERCHE ET FILTRES
+       ========================================================================== */
+    .controls-section {
+      max-width: 1200px;
       margin: 2rem auto 1rem;
       padding: 0 1rem;
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .search-bar {
-      width: 100%;
+    .search-box input {
       padding: 0.8rem 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 380px;
+      max-width: 100%;
       font-size: 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .categories-tabs {
+    .search-box input:focus {
+      border-color: #d9534f;
+      box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
+    }
+
+    .filter-tags {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
-      justify-content: center;
     }
 
-    .tab-btn {
+    .tag-btn {
+      border: 1px solid #d9534f;
       background: white;
-      border: 1px solid var(--border-color);
-      padding: 0.6rem 1.2rem;
+      color: #d9534f;
+      padding: 0.4rem 0.9rem;
       border-radius: 20px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      transition: all 0.2s;
     }
 
-    .tab-btn.active, .tab-btn:hover {
-      background-color: var(--primary-color);
+    .tag-btn:hover, .tag-btn.active {
+      background: #d9534f;
       color: white;
-      border-color: var(--primary-color);
     }
 
-    /* --- FORMULAIRE D'ADMINISTRATION --- */
-    .admin-section {
-      max-width: 800px;
-      margin: 2rem auto;
-      background: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: var(--radius);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-
-    .admin-section h2 {
-      margin-bottom: 1rem;
-      color: var(--primary-color);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .full-width {
-      grid-column: span 2;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-
-    .form-group label {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .form-group input, .form-group textarea {
-      padding: 0.6rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 0.95rem;
-    }
-
-    .checkbox-group {
-      display: flex;
-      gap: 1.2rem;
-      flex-wrap: wrap;
-      background: #f8f9fa;
-      padding: 0.8rem;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-    }
-
-    .checkbox-label {
-      font-weight: normal;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-submit {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 0.8rem;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-submit:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .btn-cancel {
-      background-color: #7f8c8d;
-      color: white;
-      border: none;
-      padding: 0.8rem;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      margin-left: 0.5rem;
-    }
-
-    /* --- GRILLE DE RECETTES --- */
-    .recipes-grid {
-      max-width: 1000px;
-      margin: 2rem auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
+    /* ==========================================================================
+       5. CONTENEURS DES CARTES & SECTIONS DÉDIÉES
+       ========================================================================== */
+    .container {
+      max-width: 1200px;
+      margin: 1rem auto 3rem;
       padding: 0 1rem;
     }
 
+    .recipes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
     .recipe-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
+      background: white;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      position: relative;
       display: flex;
       flex-direction: column;
-      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .card-badges {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      z-index: 2;
-    }
-
-    .card-badge {
-      background: var(--primary-color);
-      color: white;
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    .recipe-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
     .recipe-card img {
       width: 100%;
-      height: 180px;
+      height: 190px;
       object-fit: cover;
     }
 
+    .card-badges-container {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .card-badge {
+      background-color: #d9534f;
+      color: white;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.75rem;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .card-badge.airfryer {
+      background-color: #e67e22;
+    }
+
     .card-body {
-      padding: 1rem;
+      padding: 1.2rem;
       display: flex;
       flex-direction: column;
       flex-grow: 1;
@@ -229,170 +236,541 @@
 
     .card-body h3 {
       font-size: 1.2rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
+      color: #2c3e50;
     }
 
     .card-meta {
       font-size: 0.85rem;
-      color: #7f8c8d;
+      color: #777;
       margin-bottom: 0.8rem;
     }
 
-    .card-actions {
-      margin-top: auto;
-      display: flex;
-      gap: 0.5rem;
-      padding-top: 1rem;
+    .card-body p {
+      color: #555;
+      font-size: 0.9rem;
+      margin-bottom: 1.2rem;
+      flex-grow: 1;
     }
 
-    .btn-view, .btn-edit, .btn-delete {
-      padding: 0.5rem 0.8rem;
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-view {
+      flex: 2;
+      background-color: #d9534f;
+      color: white;
       border: none;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-edit {
+      flex: 1;
+      background-color: #f0ad4e;
+      color: white;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-delete {
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Section Liste de courses et Recettes à tester */
+    .custom-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .custom-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .custom-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-add-item {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: 8px;
+    }
+
+    /* ==========================================================================
+       6. PANNEAU D'ADMINISTRATION
+       ========================================================================== */
+    .admin-panel {
+      display: none;
+      background: #ffffff;
+      border: 2px solid #2c3e50;
+      border-radius: 10px;
+      padding: 1.8rem;
+      margin: 2rem auto;
+      max-width: 1200px;
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid #eee;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .admin-header-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-backup {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
       font-weight: 600;
+    }
+
+    .btn-backup:hover {
+      background-color: #219150;
+    }
+
+    .btn-change-pin {
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .btn-logout {
+      background-color: #7f8c8d;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
       font-size: 0.85rem;
     }
 
-    .btn-view { background: #3498db; color: white; flex-grow: 1; }
-    .btn-edit { background: #f1c40f; color: #2c3e50; }
-    .btn-delete { background: #e74c3c; color: white; }
+    .admin-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
 
-    /* --- MODALE --- */
-    .modal {
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 0.5rem 0;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: normal !important;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .btn-cancel {
+      background-color: #888;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+    }
+
+    /* ==========================================================================
+       7. FENÊTRES MODALES (PIN, DÉTAILS RECETTE & ASSISTANT DE CONVERSION)
+       ========================================================================== */
+    .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 100;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 200;
       justify-content: center;
       align-items: center;
       padding: 1rem;
     }
 
+    .modal-overlay.active {
+      display: flex;
+    }
+
     .modal-content {
       background: white;
-      max-width: 600px;
+      border-radius: 10px;
+      max-width: 700px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      border-radius: var(--radius);
-      padding: 1.5rem;
+      padding: 2rem;
       position: relative;
     }
 
-    .close-modal {
-      position: absolute;
-      top: 1rem; right: 1rem;
-      font-size: 1.5rem;
-      cursor: pointer;
-      border: none;
-      background: none;
+    .pin-modal-content {
+      background: white;
+      border-radius: 10px;
+      max-width: 380px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
-    @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .full-width { grid-column: span 1; }
+    .pin-input {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1.4rem;
+      text-align: center;
+      letter-spacing: 0.5rem;
+      margin: 1rem 0;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .pin-input:focus {
+      border-color: #2c3e50;
+      outline: none;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .modal-actions {
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-pdf {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .ingredients-list, .steps-list {
+      margin-left: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background-color: #2c3e50;
+      color: white;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>SITE DE RECETTES</h1>
-    <p>Vos meilleures recettes à portée de main</p>
+  <!-- Barre de navigation -->
+  <header class="navbar">
+    <div class="logo" onclick="goAccueil()">
+      <h1>Les Recettes 2 Pat'</h1>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" id="linkAccueil" class="active" onclick="goAccueil(event)">Accueil</a></li>
+      <li>
+        <a href="#" id="linkCourses" onclick="afficherListeCourses(event)">
+          🛒 Liste de courses <span id="coursesBadge" class="courses-badge">0</span>
+        </a>
+      </li>
+      <li><a href="#" id="linkTester" onclick="afficherRecettesATester(event)">🧪 À tester</a></li>
+      <li><button class="btn-admin-toggle" onclick="handleAdminClick()">⚙️ Admin</button></li>
+    </ul>
   </header>
 
-  <!-- RECHERCHE ET CATEGORIES -->
-  <div class="controls-container">
-    <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher une recette ou un ingrédient...">
-    
-    <div class="categories-tabs" id="categoriesTabs">
-      <button class="tab-btn active" data-category="Toutes">Toutes</button>
-      <button class="tab-btn" data-category="Entrées">Entrées</button>
-      <button class="tab-btn" data-category="Plats">Plats</button>
-      <button class="tab-btn" data-category="Desserts">Desserts</button>
-      <button class="tab-btn" data-category="Réglage Airfryer">Réglage Airfryer</button>
+  <!-- Bannière d'accueil -->
+  <section class="hero" id="heroBanner">
+    <h2>Bienvenue dans ma cuisine !</h2>
+    <p>Mes recettes maison, astuces de cuisson et tour de main au quotidien.</p>
+  </section>
+
+  <!-- Panneau d'administration -->
+  <section class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h3 id="formTitle">🛠️ Ajouter une nouvelle recette</h3>
+      <div class="admin-header-actions">
+        <button class="btn-backup" onclick="sauvegarderBDD()">💾 Sauvegarder BDD</button>
+        <button class="btn-change-pin" onclick="changerPin()">🔑 Changer le PIN</button>
+        <button class="btn-logout" onclick="logoutAdmin()">🔒 Déconnexion</button>
+      </div>
     </div>
-  </div>
 
-  <!-- FORMULAIRE D'AJOUT / EDITION -->
-  <section class="admin-section">
-    <h2 id="formTitle">Ajouter une Recette</h2>
     <form id="recipeForm">
-      <input type="hidden" id="recipeId">
-      
-      <div class="form-grid">
-        <div class="form-group full-width">
-          <label for="recipeTitle">Titre de la recette</label>
-          <input type="text" id="recipeTitle" required placeholder="ex: Poulet Rôti Crisp">
-        </div>
+      <input type="hidden" id="editRecipeId" value="">
 
-        <!-- SELECTION MULTI-CATEGORIES -->
-        <div class="form-group full-width">
-          <label>Catégories (cocher une ou plusieurs) :</label>
+      <div class="admin-form-grid">
+        <div class="form-group">
+          <label for="recipeTitle">Titre de la recette</label>
+          <input type="text" id="recipeTitle" placeholder="ex: Poulet au Maroilles">
+        </div>
+        
+        <div class="form-group">
+          <label>Catégories (sélection multiple)</label>
           <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" class="category-checkbox" value="Entrées"> Entrées
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" class="category-checkbox" value="Plats"> Plats
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" class="category-checkbox" value="Desserts"> Desserts
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" class="category-checkbox" value="Réglage Airfryer"> Réglage Airfryer
-            </label>
+            <label class="checkbox-label"><input type="checkbox" name="recipeCategory" value="Entrées"> Entrées</label>
+            <label class="checkbox-label"><input type="checkbox" name="recipeCategory" value="Plats" checked> Plats</label>
+            <label class="checkbox-label"><input type="checkbox" name="recipeCategory" value="Desserts"> Desserts</label>
+            <label class="checkbox-label"><input type="checkbox" name="recipeCategory" value="Réglage Airfryer"> Réglage Airfryer</label>
           </div>
         </div>
 
         <div class="form-group">
           <label for="recipeTime">Temps de préparation / cuisson</label>
-          <input type="text" id="recipeTime" placeholder="ex: 25 min">
+          <input type="text" id="recipeTime" placeholder="ex: 35 min">
         </div>
-
         <div class="form-group">
           <label for="recipeServings">Nombre de personnes</label>
           <input type="text" id="recipeServings" placeholder="ex: 4 pers.">
         </div>
-
         <div class="form-group full-width">
-          <label for="recipeImageUrl">URL de l'image</label>
+          <label for="recipeImageUrl">Lien de l'image (URL photo)</label>
           <input type="url" id="recipeImageUrl" placeholder="https://exemple.com/image.jpg">
         </div>
-
         <div class="form-group full-width">
-          <label for="recipeIngredients">Ingrédients (1 par ligne)</label>
-          <textarea id="recipeIngredients" rows="4" placeholder="200g de farine&#10;2 œufs&#10;100ml de lait"></textarea>
+          <label for="recipeIngredients">Ingrédients (un par ligne)</label>
+          <textarea id="recipeIngredients" rows="4" placeholder="4 cuisses de poulet&#10;200g de Maroilles"></textarea>
         </div>
-
         <div class="form-group full-width">
-          <label for="recipeSteps">Étapes de préparation (1 par ligne)</label>
-          <textarea id="recipeSteps" rows="4" placeholder="Mélanger la farine et les œufs.&#10;Ajouter le lait progressivement."></textarea>
-        </div>
-
-        <div class="full-width" style="margin-top: 0.5rem;">
-          <button type="submit" class="btn-submit" id="btnSave">Enregistrer la recette</button>
-          <button type="button" class="btn-cancel" id="btnCancel" style="display: none;">Annuler</button>
+          <label for="recipeSteps">Étapes de préparation (une par ligne)</label>
+          <textarea id="recipeSteps" rows="5" placeholder="Faire revenir le poulet.&#10;Faire fondre le Maroilles."></textarea>
         </div>
       </div>
+      
+      <button type="submit" class="btn-submit" id="btnSubmitForm">➕ Enregistrer la recette</button>
+      <button type="button" class="btn-cancel" onclick="resetForm()">Réinitialiser</button>
     </form>
   </section>
 
-  <!-- CONTENEUR DES CARTES DE RECETTES -->
-  <main class="recipes-grid" id="recipesGrid"></main>
+  <!-- Filtres et Recherche -->
+  <section class="controls-section" id="controlsSection">
+    <div class="search-box">
+      <input type="text" placeholder="Rechercher une recette, un ingrédient..." id="searchInput">
+    </div>
+    <div class="filter-tags">
+      <button class="tag-btn active" data-category="Toutes">Toutes</button>
+      <button class="tag-btn" data-category="Entrées">Entrées</button>
+      <button class="tag-btn" data-category="Plats">Plats</button>
+      <button class="tag-btn" data-category="Desserts">Desserts</button>
+      <button class="tag-btn" data-category="Réglage Airfryer">Réglage Airfryer</button>
+    </div>
+  </section>
 
-  <!-- MODALE POUR DÉTAILS DE LA RECETTE -->
-  <div class="modal" id="recipeModal">
-    <div class="modal-content">
-      <button class="close-modal" id="closeModal">&times;</button>
-      <div id="modalDetails"></div>
+  <!-- Container principal : Grille de recettes -->
+  <main class="container" id="mainContainer">
+    <div class="recipes-grid" id="recipesGrid">
+      <p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>
+    </div>
+  </main>
+
+  <!-- Section : Liste de courses -->
+  <section id="coursesSection" class="container" style="display: none;">
+    <div class="custom-box">
+      <div class="custom-header">
+        <h2>🛒 Ma liste de courses</h2>
+        <div class="custom-actions">
+          <button class="btn-pdf" onclick="telechargerPDFCourses()">📄 PDF Liste</button>
+          <button onclick="viderListeCourses()" style="background: #d9534f; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            🗑️ Tout effacer
+          </button>
+        </div>
+      </div>
+      
+      <div id="pdf-courses-container">
+        <ul id="listeCoursesUl" style="list-style: none; padding: 0;">
+          <!-- Les ingrédients ajoutés s'afficheront ici -->
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section : Recettes à tester -->
+  <section id="testerSection" class="container" style="display: none;">
+    <div class="custom-box">
+      <div class="custom-header">
+        <h2>🧪 Recettes à tester</h2>
+      </div>
+
+      <!-- Formulaire d'ajout (visible uniquement en mode Admin) -->
+      <div id="addTestRecipeForm" style="display: none; background: #f8f9fa; padding: 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+        <h4 style="margin-bottom: 0.8rem; color: #2c3e50;">➕ Ajouter un lien vers une recette externe</h4>
+        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+          <input type="text" id="testRecipeTitle" placeholder="Titre de la recette (ex: Tarte au citron Marmiton)" style="flex: 1; min-width: 200px; padding: 0.6rem; border: 1px solid #ccc; border-radius: 6px;">
+          <input type="url" id="testRecipeUrl" placeholder="https://exemple.com/recette" style="flex: 2; min-width: 250px; padding: 0.6rem; border: 1px solid #ccc; border-radius: 6px;">
+          <button onclick="ajouterRecetteATester()" style="background: #27ae60; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            Enregistrer
+          </button>
+        </div>
+      </div>
+
+      <!-- Liste des cartes de liens -->
+      <div id="testerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+        <p style="color: #777;">Chargement des recettes à tester...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fenêtre modale : Security PIN -->
+  <div class="modal-overlay" id="pinModal">
+    <div class="pin-modal-content">
+      <button class="modal-close" onclick="fermerPinModal()">&times;</button>
+      <h3>🔒 Accès Administration</h3>
+      <p style="font-size:0.9rem; color:#666; margin-top:0.5rem;">Saisis ton code PIN pour accéder à l'interface d'édition :</p>
+      <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••">
+      <p id="pinError" style="color:#d9534f; font-size:0.85rem; display:none; margin-bottom:0.8rem;">Code PIN incorrect !</p>
+      <button class="btn-submit" style="width:100%;" onclick="verifierPin()">Valider</button>
     </div>
   </div>
 
-  <!-- INTEGRATION FIREBASE & LOGIQUE APPLICATIVE -->
+  <!-- Fenêtre modale : Détails de la recette -->
+  <div class="modal-overlay" id="recipeModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="fermerRecette()">&times;</button>
+      <div class="modal-actions">
+        <button class="btn-pdf" onclick="telechargerPDF()">📄 Télécharger en PDF</button>
+      </div>
+      <div id="pdf-container">
+        <h2 id="modalTitre">Titre</h2>
+        <div class="card-meta" id="modalMeta">Meta</div>
+        <h4>Ingrédients :</h4>
+        <ul class="ingredients-list" id="modalIngredients"></ul>
+        <h4>Préparation :</h4>
+        <ol class="steps-list" id="modalEtapes"></ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fenêtre modale : Assistant de conversion Copier-Coller (Méthode B) -->
+  <div class="modal-overlay" id="convertModal">
+    <div class="modal-content" style="max-width: 650px;">
+      <button class="modal-close" onclick="fermerConvertModal()">&times;</button>
+      <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">🪄 Transformer en fiche recette</h3>
+      <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">
+        Copie tout le texte de la page web (Ctrl+A puis Ctrl+C) et colle-le ci-dessous. L'assistant détectera automatiquement le titre, les ingrédients et la préparation.
+      </p>
+
+      <div class="form-group">
+        <label for="convertRawText">Texte copié depuis le site :</label>
+        <textarea id="convertRawText" rows="10" placeholder="Colle le texte brut de la recette ici..." style="width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.85rem;"></textarea>
+      </div>
+
+      <input type="hidden" id="convertSourceDocId" value="">
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1rem;">
+        <button type="button" onclick="fermerConvertModal()" style="background: #888; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer;">
+          Annuler
+        </button>
+        <button type="button" onclick="analyserEtCompleterFormulaire()" style="background: #27ae60; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer;">
+          ⚡ Analyser & Pré-remplir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Les Recettes 2 Pat' — Tous droits réservés</p>
+  </footer>
+
+  <!-- SCRIPT LOGIQUE JS & FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -400,154 +778,746 @@
       collection, 
       addDoc, 
       getDocs, 
+      getDoc, 
+      setDoc, 
       doc, 
       updateDoc, 
       deleteDoc, 
-      getDoc,
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // --- CONFIGURATION FIREBASE ---
-    // Remplacez ces valeurs par celles de votre projet Firebase
+    // Configuration Firebase
     const firebaseConfig = {
-      apiKey: "VOTRE_API_KEY",
-      authDomain: "VOTRE_PROJET.firebaseapp.com",
-      projectId: "VOTRE_PROJET_ID",
-      storageBucket: "VOTRE_PROJET.appspot.com",
-      messagingSenderId: "VOTRE_SENDER_ID",
-      appId: "VOTRE_APP_ID"
+      apiKey: "AIzaSyB5YWY1ECkbJod1swg6ytEnMbnUhEjonkY",
+      authDomain: "les-recettes-2-pat.firebaseapp.com",
+      projectId: "les-recettes-2-pat",
+      storageBucket: "les-recettes-2-pat.firebasestorage.app",
+      messagingSenderId: "900183636735",
+      appId: "1:900183636735:web:e74451fb0a58b0c529eaca"
     };
 
+    // Initialisation Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const recipesCollection = collection(db, "recettes");
+    const recipesCollection = collection(db, "recipes");
+    const testRecipesCollection = collection(db, "recipes_to_test");
+    const configDocRef = doc(db, "settings", "config");
 
-    // --- VARIABLES D'ETAT ---
+    let isAdminAuthenticated = false;
     let loadedRecipes = [];
-    let currentCategory = "Toutes";
+    let currentCategory = 'Toutes';
 
-    // --- ELEMENTS DU DOM ---
-    const recipesGrid = document.getElementById('recipesGrid');
-    const recipeForm = document.getElementById('recipeForm');
-    const searchInput = document.getElementById('searchInput');
-    const categoriesTabs = document.getElementById('categoriesTabs');
-    const modal = document.getElementById('recipeModal');
-    const modalDetails = document.getElementById('modalDetails');
-    const closeModalBtn = document.getElementById('closeModal');
-    const btnCancel = document.getElementById('btnCancel');
-    const formTitle = document.getElementById('formTitle');
+    // --------------------------------------------------------------------------
+    // NAVIGATION ET ROULEMENT DE VUES
+    // --------------------------------------------------------------------------
+    window.goAccueil = function(e) {
+      if (e) e.preventDefault();
+      document.getElementById('coursesSection').style.display = 'none';
+      document.getElementById('testerSection').style.display = 'none';
+      document.getElementById('heroBanner').style.display = 'block';
+      document.getElementById('controlsSection').style.display = 'flex';
+      document.getElementById('mainContainer').style.display = 'block';
+      document.getElementById('adminPanel').classList.remove('active');
+      
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.getElementById('linkAccueil').classList.add('active');
+      
+      resetForm();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-    const defaultImg = "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=600&q=80";
+    window.afficherListeCourses = function(e) {
+      if (e) e.preventDefault();
+      document.getElementById('heroBanner').style.display = 'none';
+      document.getElementById('controlsSection').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('testerSection').style.display = 'none';
+      document.getElementById('adminPanel').classList.remove('active');
 
-    // --- INITIALISATION ---
-    document.addEventListener('DOMContentLoaded', () => {
-      chargerRecettes();
-      initEvents();
-    });
+      document.getElementById('coursesSection').style.display = 'block';
 
-    function initEvents() {
-      recipeForm.addEventListener('submit', handleFormSubmit);
-      searchInput.addEventListener('input', filterRecipes);
-      closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
-      btnCancel.addEventListener('click', resetForm);
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.getElementById('linkCourses').classList.add('active');
 
-      // Gestion du clic sur les onglets de catégorie
-      categoriesTabs.addEventListener('click', (e) => {
-        if (e.target.classList.contains('tab-btn')) {
-          document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-          e.target.classList.add('active');
-          currentCategory = e.target.getAttribute('data-category');
-          filterRecipes();
-        }
-      });
+      rendreListeCourses();
+    };
 
-      // Fermer la modale au clic extérieur
-      window.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-      });
+    window.afficherRecettesATester = function(e) {
+      if (e) e.preventDefault();
+      document.getElementById('heroBanner').style.display = 'none';
+      document.getElementById('controlsSection').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('coursesSection').style.display = 'none';
+      document.getElementById('adminPanel').classList.remove('active');
+
+      document.getElementById('testerSection').style.display = 'block';
+
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.getElementById('linkTester').classList.add('active');
+
+      const addForm = document.getElementById('addTestRecipeForm');
+      if (isAdminAuthenticated) {
+        addForm.style.display = 'block';
+      } else {
+        addForm.style.display = 'none';
+      }
+
+      chargerRecettesATester();
+    };
+
+    // --------------------------------------------------------------------------
+    // GESTION LOCALSTORAGE (LISTE DE COURSES)
+    // --------------------------------------------------------------------------
+    function getCoursesStorage() {
+      return JSON.parse(localStorage.getItem('recettes_courses_list')) || [];
     }
 
-    // --- CHARGEMENT DES RECETTES DEPUIS FIRESTORE ---
-    async function chargerRecettes() {
-      recipesGrid.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Chargement des recettes...</p>";
-      try {
-        const querySnapshot = await getDocs(recipesCollection);
-        loadedRecipes = [];
-        recipesGrid.innerHTML = "";
-
-        querySnapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const recipe = { id: docSnap.id, ...data };
-          loadedRecipes.push(recipe);
-          
-          afficherCarteRecette(recipe);
-        });
-
-        if (loadedRecipes.length === 0) {
-          recipesGrid.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Aucune recette trouvée.</p>";
-        }
-
-        filterRecipes();
-      } catch (error) {
-        console.error("Erreur lors du chargement :", error);
-        recipesGrid.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: red;'>Erreur lors de la récupération des recettes.</p>";
+    function mettreAJourBadge() {
+      const courses = getCoursesStorage();
+      const badge = document.getElementById('coursesBadge');
+      if (courses.length > 0) {
+        badge.innerText = courses.length;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
       }
     }
 
-    // --- AFFICHAGE D'UNE CARTE RECETTE ---
-    function afficherCarteRecette(recipe) {
-      // Compatibilité ascendante : supporte l'ancien champ 'categorie' ou le nouveau 'categories'
-      const categoriesArray = Array.isArray(recipe.categories) 
-        ? recipe.categories 
-        : (recipe.categorie ? [recipe.categorie] : ["Plats"]);
+    window.ajouterAuPanier = function(ingredient) {
+      let courses = getCoursesStorage();
+      if (!courses.includes(ingredient)) {
+        courses.push(ingredient);
+        localStorage.setItem('recettes_courses_list', JSON.stringify(courses));
+        mettreAJourBadge();
+        alert(`"${ingredient}" a été ajouté à ta liste de courses !`);
+      } else {
+        alert(`"${ingredient}" est déjà présent dans ta liste.`);
+      }
+    };
 
-      const badgesHTML = categoriesArray
-        .map(cat => `<span class="card-badge">${cat}</span>`)
-        .join('');
-
-      const card = document.createElement('article');
-      card.className = 'recipe-card';
-      // Stocke les catégories sous forme de chaîne encadrée par des espaces pour le filtrage précis
-      card.setAttribute('data-categories', categoriesArray.join('|'));
-      card.setAttribute('data-id', recipe.id);
-
-      card.innerHTML = `
-        <div class="card-badges">${badgesHTML}</div>
-        <img src="${recipe.imageUrl || defaultImg}" alt="${recipe.titre}">
-        <div class="card-body">
-          <h3>${recipe.titre}</h3>
-          <div class="card-meta">⏱️ ${recipe.temps || 'N/C'} | 👥 ${recipe.personnes || 'N/C'}</div>
-          <div class="card-actions">
-            <button class="btn-view" data-id="${recipe.id}">Voir</button>
-            <button class="btn-edit" data-id="${recipe.id}">✏️</button>
-            <button class="btn-delete" data-id="${recipe.id}">🗑️</button>
-          </div>
-        </div>
-      `;
-
-      // Listeners pour les boutons d'action
-      card.querySelector('.btn-view').addEventListener('click', () => ouvrirRecette(recipe.id));
-      card.querySelector('.btn-edit').addEventListener('click', () => editerRecette(recipe.id));
-      card.querySelector('.btn-delete').addEventListener('click', () => supprimerRecette(recipe.id));
-
-      recipesGrid.appendChild(card);
+    function rendreListeCourses() {
+      const courses = getCoursesStorage();
+      const ul = document.getElementById('listeCoursesUl');
+      
+      if (courses.length === 0) {
+        ul.innerHTML = '<li style="color:#777;">Ta liste de courses est vide. Clique sur les ingrédients d\'une recette pour en ajouter !</li>';
+      } else {
+        ul.innerHTML = courses.map((item, index) => `
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid #eee;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" style="transform: scale(1.2);">
+              <span>${item}</span>
+            </label>
+            <button onclick="retirerArticle(${index})" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 1.1rem;">❌</button>
+          </li>
+        `).join('');
+      }
     }
 
-    // --- SOUMISSION DU FORMULAIRE (CREATION / EDIT) ---
-    async function handleFormSubmit(e) {
+    window.retirerArticle = function(index) {
+      let courses = getCoursesStorage();
+      courses.splice(index, 1);
+      localStorage.setItem('recettes_courses_list', JSON.stringify(courses));
+      mettreAJourBadge();
+      rendreListeCourses();
+    };
+
+    window.viderListeCourses = function() {
+      if (confirm("Voulez-vous vraiment effacer toute la liste de courses ?")) {
+        localStorage.removeItem('recettes_courses_list');
+        mettreAJourBadge();
+        rendreListeCourses();
+      }
+    };
+
+    window.telechargerPDFCourses = function() {
+      const element = document.getElementById('pdf-courses-container');
+      html2pdf().set({
+        margin: 10,
+        filename: 'liste_de_courses.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    };
+
+    // --------------------------------------------------------------------------
+    // RECETTES À TESTER (FIRESTORE) & ASSISTANT DE CONVERSION (MÉTHODE B)
+    // --------------------------------------------------------------------------
+    async function chargerRecettesATester() {
+      const grid = document.getElementById('testerGrid');
+      grid.innerHTML = '<p style="color:#777;">Chargement...</p>';
+
+      try {
+        const snapshot = await getDocs(testRecipesCollection);
+        grid.innerHTML = '';
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<p style="color:#777; grid-column: 1/-1;">Aucune recette à tester pour le moment.</p>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const actionsAdmin = isAdminAuthenticated ? `
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              <button onclick="ouvrirConvertModal('${docSnap.id}', '${data.titre.replace(/'/g, "\\'")}', '${data.url}')" style="background: #27ae60; color: white; border: none; padding: 0.38rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;" title="Transformer en fiche recette">
+                🪄 Transformer
+              </button>
+              <button onclick="supprimerRecetteATester('${docSnap.id}')" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 1.1rem; padding: 0.2rem;" title="Supprimer">
+                🗑️
+              </button>
+            </div>
+          ` : '';
+
+          const cardHTML = `
+            <div style="background: #fdfdfd; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03); flex-wrap: wrap; gap: 0.5rem;">
+              <div style="overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 180px;">
+                <strong style="display: block; color: #2c3e50; font-size: 0.95rem; margin-bottom: 0.2rem;">${data.titre}</strong>
+                <a href="${data.url}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none; font-size: 0.8rem; word-break: break-all;">
+                  🔗 Ouvrir la recette ↗
+                </a>
+              </div>
+              ${actionsAdmin}
+            </div>
+          `;
+          grid.innerHTML += cardHTML;
+        });
+
+      } catch (e) {
+        console.error("Erreur de chargement des recettes à tester :", e);
+        grid.innerHTML = '<p style="color:red; grid-column: 1/-1;">Erreur lors du chargement.</p>';
+      }
+    }
+
+    window.ajouterRecetteATester = async function() {
+      if (!isAdminAuthenticated) return;
+
+      const titreInput = document.getElementById('testRecipeTitle');
+      const urlInput = document.getElementById('testRecipeUrl');
+
+      const titre = titreInput.value.trim();
+      const url = urlInput.value.trim();
+
+      if (!titre || !url) {
+        alert("Merci de renseigner un titre et un lien URL valide.");
+        return;
+      }
+
+      try {
+        await addDoc(testRecipesCollection, {
+          titre: titre,
+          url: url,
+          createdAt: serverTimestamp()
+        });
+
+        titreInput.value = '';
+        urlInput.value = '';
+        chargerRecettesATester();
+      } catch (e) {
+        console.error("Erreur d'ajout :", e);
+        alert("Impossible d'ajouter le lien.");
+      }
+    };
+
+    window.supprimerRecetteATester = async function(id) {
+      if (!isAdminAuthenticated) return;
+
+      if (confirm("Supprimer ce lien de la liste ?")) {
+        try {
+          await deleteDoc(doc(db, "recipes_to_test", id));
+          chargerRecettesATester();
+        } catch (e) {
+          console.error("Erreur de suppression :", e);
+          alert("Impossible de supprimer le lien.");
+        }
+      }
+    };
+
+    // --- ASSISTANT DE CONVERSION (MÉTHODE B) ---
+    window.ouvrirConvertModal = function(docId, titre, url) {
+      if (!isAdminAuthenticated) return;
+
+      document.getElementById('convertSourceDocId').value = docId;
+      document.getElementById('convertRawText').value = '';
+      
+      window.open(url, '_blank');
+      document.getElementById('convertModal').classList.add('active');
+    };
+
+    window.fermerConvertModal = function() {
+      document.getElementById('convertModal').classList.remove('active');
+    };
+
+    window.analyserEtCompleterFormulaire = function() {
+      const rawText = document.getElementById('convertRawText').value.trim();
+      const docIdToDelete = document.getElementById('convertSourceDocId').value;
+
+      if (!rawText) {
+        alert("Veuillez coller le texte de la recette avant d'analyser.");
+        return;
+      }
+
+      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+      let titre = lines[0] || '';
+      let temps = '';
+      let personnes = '';
+      let ingredients = [];
+      let etapes = [];
+
+      let modeActuel = 'ACCUEIL'; 
+
+      const motsClesIngredients = ['ingrédient', 'ingrédients', 'pour 4 personnes', 'pour 2 personnes', 'pour 6 personnes', 'ce qu\'il faut'];
+      const motsClesEtapes = ['préparation', 'étapes', 'instructions', 'déroulement', 'recette', 'étape 1', 'étape'];
+
+      lines.forEach((line, index) => {
+        const lineLower = line.toLowerCase();
+
+        if (!temps && (lineLower.includes('min') || lineLower.includes('h') || lineLower.includes('temps'))) {
+          if (line.length < 40) temps = line;
+        }
+
+        if (!personnes && (lineLower.includes('personne') || lineLower.includes('pers') || lineLower.includes('parts'))) {
+          if (line.length < 30) personnes = line;
+        }
+
+        if (motsClesIngredients.some(k => lineLower === k || lineLower.startsWith(k + ':') || lineLower.startsWith(k + 's:'))) {
+          modeActuel = 'INGREDIENTS';
+          return;
+        }
+
+        if (motsClesEtapes.some(k => lineLower === k || lineLower.startsWith(k + ':') || lineLower.startsWith(k + 's:'))) {
+          modeActuel = 'ETAPES';
+          return;
+        }
+
+        if (modeActuel === 'INGREDIENTS') {
+          if (line.length > 2 && line.length < 100) {
+            ingredients.push(line.replace(/^[-•*]\s*/, ''));
+          }
+        } else if (modeActuel === 'ETAPES') {
+          if (line.length > 5) {
+            etapes.push(line.replace(/^\d+[\.\)]\s*/, '').replace(/^[-•*]\s*/, ''));
+          }
+        } else {
+          if (index > 0) {
+            if (/^\d+\s*(g|kg|ml|cl|l|cuillère|c\.|pincée)/i.test(line) || /^[-•*]/.test(line)) {
+              ingredients.push(line.replace(/^[-•*]\s*/, ''));
+            } else if (line.length > 30) {
+              etapes.push(line);
+            }
+          }
+        }
+      });
+
+      fermerConvertModal();
+      window.goAccueil();
+
+      resetForm();
+      document.getElementById('recipeTitle').value = titre;
+      document.getElementById('recipeTime').value = temps;
+      document.getElementById('recipeServings').value = personnes;
+      document.getElementById('recipeIngredients').value = ingredients.join('\n');
+      document.getElementById('recipeSteps').value = etapes.join('\n');
+
+      document.getElementById('adminPanel').classList.add('active');
+
+      if (docIdToDelete) {
+        setTimeout(async () => {
+          if (confirm("Voulez-vous supprimer ce lien de la liste 'Recettes à tester' puisqu'il est en cours de conversion ?")) {
+            try {
+              await deleteDoc(doc(db, "recipes_to_test", docIdToDelete));
+              chargerRecettesATester();
+            } catch (err) {
+              console.error("Erreur de nettoyage du lien à tester :", err);
+            }
+          }
+        }, 500);
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // EXPORT JSON BDD
+    // --------------------------------------------------------------------------
+    window.sauvegarderBDD = async function() {
+      if (!isAdminAuthenticated) return;
+
+      try {
+        const snapshot = await getDocs(recipesCollection);
+        const dataBackup = [];
+
+        snapshot.forEach(docSnap => {
+          dataBackup.push({
+            id: docSnap.id,
+            ...docSnap.data()
+          });
+        });
+
+        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(dataBackup, null, 2))}`;
+        const dateStr = new Date().toISOString().split('T')[0];
+        
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", jsonString);
+        downloadAnchor.setAttribute("download", `backup_recettes_${dateStr}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        alert(`Sauvegarde réussie ! ${dataBackup.length} recette(s) exportée(s).`);
+
+      } catch (e) {
+        console.error("Erreur lors de la sauvegarde BDD :", e);
+        alert("Erreur lors de l'exportation de la base de données.");
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // GESTION PIN & ADMIN
+    // --------------------------------------------------------------------------
+    async function getAdminPin() {
+      try {
+        const configSnap = await getDoc(configDocRef);
+        if (configSnap.exists()) {
+          return configSnap.data().pin;
+        } else {
+          const defaultPin = "1234";
+          await setDoc(configDocRef, { pin: defaultPin }, { merge: true });
+          return defaultPin;
+        }
+      } catch (e) {
+        console.error("Erreur de lecture du PIN :", e);
+        return "1234";
+      }
+    }
+
+    window.handleAdminClick = function() {
+      if (isAdminAuthenticated) {
+        document.getElementById('adminPanel').classList.toggle('active');
+      } else {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').style.display = 'none';
+        document.getElementById('pinModal').classList.add('active');
+        document.getElementById('pinInput').focus();
+      }
+    };
+
+    window.verifierPin = async function() {
+      const pinSaisi = document.getElementById('pinInput').value;
+      const currentPin = await getAdminPin();
+
+      if (pinSaisi === currentPin) {
+        isAdminAuthenticated = true;
+        document.getElementById('pinModal').classList.remove('active');
+        document.getElementById('adminPanel').classList.add('active');
+        
+        if (document.getElementById('testerSection').style.display === 'block') {
+          document.getElementById('addTestRecipeForm').style.display = 'block';
+          chargerRecettesATester();
+        }
+
+        chargerRecettes();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        document.getElementById('pinError').style.display = 'block';
+        document.getElementById('pinInput').value = '';
+      }
+    };
+
+    window.changerPin = async function() {
+      const currentPin = await getAdminPin();
+      const pinActuel = prompt("Saisis ton code PIN actuel :");
+      
+      if (pinActuel === null) return;
+
+      if (pinActuel !== currentPin) {
+        alert("Code PIN actuel incorrect !");
+        return;
+      }
+
+      const nouveauPin = prompt("Entre ton nouveau code PIN (4 chiffres) :");
+      if (nouveauPin === null) return;
+
+      if (!nouveauPin || nouveauPin.trim().length < 4) {
+        alert("Le code PIN doit contenir au moins 4 chiffres.");
+        return;
+      }
+
+      try {
+        await setDoc(configDocRef, { pin: nouveauPin.trim() }, { merge: true });
+        alert("Code PIN mis à jour avec succès dans Firebase !");
+      } catch (e) {
+        console.error("Erreur de modification du PIN :", e);
+        alert("Erreur lors de la modification du PIN.");
+      }
+    };
+
+    window.fermerPinModal = function() {
+      document.getElementById('pinModal').classList.remove('active');
+    };
+
+    window.logoutAdmin = function() {
+      isAdminAuthenticated = false;
+      document.getElementById('adminPanel').classList.remove('active');
+      document.getElementById('addTestRecipeForm').style.display = 'none';
+      chargerRecettes();
+      chargerRecettesATester();
+      alert("Déconnexion de l'administration réussie.");
+    };
+
+    // --------------------------------------------------------------------------
+    // EXPORT PDF RECETTE
+    // --------------------------------------------------------------------------
+    window.fermerRecette = function() {
+      document.getElementById('recipeModal').classList.remove('active');
+    };
+
+    window.telechargerPDF = function() {
+      const element = document.getElementById('pdf-container');
+      const titre = document.getElementById('modalTitre').innerText || "recette";
+      html2pdf().set({
+        margin: 10,
+        filename: `${titre.toLowerCase().replace(/[^a-z0-9]/gi, '_')}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    };
+
+    // --------------------------------------------------------------------------
+    // RECHERCHE & FILTRES
+    // --------------------------------------------------------------------------
+    function filterRecipes() {
+      const searchInput = document.getElementById('searchInput');
+      const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const cards = document.querySelectorAll('.recipe-card');
+
+      cards.forEach(card => {
+        const title = card.querySelector('h3') ? card.querySelector('h3').textContent.toLowerCase() : '';
+        const categoriesAttr = card.getAttribute('data-categories') || '';
+        const recipeCategories = categoriesAttr.split(',');
+
+        const recipeId = card.querySelector('.btn-view').getAttribute('onclick').match(/'([^']+)'/)[1];
+        const recipe = loadedRecipes.find(r => r.id === recipeId);
+        const ingredientsText = recipe && recipe.ingredients ? recipe.ingredients.join(' ').toLowerCase() : '';
+
+        const matchesQuery = title.includes(query) || ingredientsText.includes(query);
+        const matchesCategory = (currentCategory === 'Toutes' || recipeCategories.includes(currentCategory));
+
+        if (matchesQuery && matchesCategory) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function initFilterEvents() {
+      const searchInput = document.getElementById('searchInput');
+      const tagButtons = document.querySelectorAll('.tag-btn');
+
+      if (searchInput) {
+        searchInput.removeEventListener('input', filterRecipes);
+        searchInput.addEventListener('input', filterRecipes);
+      }
+
+      tagButtons.forEach(btn => {
+        btn.onclick = () => {
+          tagButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.getAttribute('data-category');
+          filterRecipes();
+        };
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // GESTION DES RECETTES (FIRESTORE)
+    // --------------------------------------------------------------------------
+    window.editerRecette = function(id) {
+      if (!isAdminAuthenticated) {
+        window.handleAdminClick();
+        return;
+      }
+
+      const recipe = loadedRecipes.find(r => r.id === id);
+      if (!recipe) return;
+
+      document.getElementById('editRecipeId').value = recipe.id;
+      document.getElementById('recipeTitle').value = recipe.titre || '';
+      
+      // Gestion de la sélection multiple des catégories
+      const categoriesArray = recipe.categories || (recipe.categorie ? [recipe.categorie] : ['Plats']);
+      document.querySelectorAll('input[name="recipeCategory"]').forEach(cb => {
+        cb.checked = categoriesArray.includes(cb.value);
+      });
+
+      document.getElementById('recipeTime').value = recipe.temps || '';
+      document.getElementById('recipeServings').value = recipe.personnes || '';
+      document.getElementById('recipeImageUrl').value = recipe.imageUrl || '';
+      document.getElementById('recipeIngredients').value = recipe.ingredients ? recipe.ingredients.join('\n') : '';
+      document.getElementById('recipeSteps').value = recipe.etapes ? recipe.etapes.join('\n') : '';
+
+      document.getElementById('formTitle').innerText = "✏️ Modifier la recette";
+      document.getElementById('btnSubmitForm').innerText = "💾 Mettre à jour la recette";
+
+      document.getElementById('adminPanel').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.supprimerRecette = async function(id) {
+      if (!isAdminAuthenticated) {
+        window.handleAdminClick();
+        return;
+      }
+
+      if (confirm("Voulez-vous vraiment supprimer définitivement cette recette ?")) {
+        try {
+          await deleteDoc(doc(db, "recipes", id));
+          alert("La recette a été supprimée.");
+          chargerRecettes();
+        } catch (e) {
+          console.error("Erreur de suppression :", e);
+          alert("Erreur lors de la suppression de la recette.");
+        }
+      }
+    };
+
+    window.resetForm = function() {
+      document.getElementById('recipeForm').reset();
+      document.getElementById('editRecipeId').value = '';
+      
+      // Réinitialisation par défaut des cases à cocher
+      document.querySelectorAll('input[name="recipeCategory"]').forEach(cb => {
+        cb.checked = (cb.value === 'Plats');
+      });
+
+      document.getElementById('formTitle').innerText = "🛠️ Ajouter une nouvelle recette";
+      document.getElementById('btnSubmitForm').innerText = "➕ Enregistrer la recette";
+    };
+
+    window.ouvrirRecette = function(id) {
+      const recipe = loadedRecipes.find(r => r.id === id);
+      if (!recipe) return;
+
+      const titre = recipe.titre && recipe.titre.trim() !== '' ? recipe.titre : "Sans titre";
+      const temps = recipe.temps || "-";
+      const personnes = recipe.personnes || "-";
+      
+      const categoriesList = recipe.categories || (recipe.categorie ? [recipe.categorie] : ["Plats"]);
+      const categoriesText = categoriesList.join(', ');
+
+      document.getElementById('modalTitre').innerText = titre;
+      document.getElementById('modalMeta').innerText = `⏱️ ${temps} | 👥 ${personnes} | Catégorie(s) : ${categoriesText}`;
+      
+      if (recipe.ingredients && recipe.ingredients.length > 0) {
+        document.getElementById('modalIngredients').innerHTML = recipe.ingredients.map(i => {
+          const ingEscaped = i.replace(/'/g, "\\'");
+          return `
+            <li style="margin-bottom:0.5rem;">
+              ${i} 
+              <button class="btn-add-item" onclick="ajouterAuPanier('${ingEscaped}')">➕ Panier</button>
+            </li>
+          `;
+        }).join('');
+      } else {
+        document.getElementById('modalIngredients').innerHTML = '<li><em>Aucun ingrédient renseigné</em></li>';
+      }
+
+      if (recipe.etapes && recipe.etapes.length > 0) {
+        document.getElementById('modalEtapes').innerHTML = recipe.etapes.map(e => `<li>${e}</li>`).join('');
+      } else {
+        document.getElementById('modalEtapes').innerHTML = '<li><em>Aucune étape renseignée</em></li>';
+      }
+
+      document.getElementById('recipeModal').classList.add('active');
+    };
+
+    async function chargerRecettes() {
+      const grid = document.getElementById('recipesGrid');
+      grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chargement des recettes...</p>';
+
+      try {
+        const snapshot = await getDocs(recipesCollection);
+        grid.innerHTML = '';
+        loadedRecipes = [];
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Aucune recette trouvée dans la base de données.</p>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const recipeObj = { id: docSnap.id, ...data };
+          loadedRecipes.push(recipeObj);
+
+          const defaultImg = 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=500&q=80';
+          const titreAffiche = data.titre && data.titre.trim() !== '' ? data.titre : "Sans titre";
+          const tempsAffiche = data.temps || "-";
+          const personnesAffiche = data.personnes || "-";
+          
+          // Compatibilité rétroactive (anciennes fiches avec `categorie` unique vs nouvelles avec `categories`)
+          const categoriesList = data.categories || (data.categorie ? [data.categorie] : ["Plats"]);
+          const categoriesAttr = categoriesList.join(',');
+
+          // Badges visuels sur la carte
+          const badgesHTML = categoriesList.map(cat => {
+            const extraClass = cat === 'Réglage Airfryer' ? 'airfryer' : '';
+            return `<span class="card-badge ${extraClass}">${cat}</span>`;
+          }).join('');
+
+          const adminButtons = isAdminAuthenticated ? `
+            <button class="btn-edit" onclick="editerRecette('${docSnap.id}')">✏️</button>
+            <button class="btn-delete" onclick="supprimerRecette('${docSnap.id}')">🗑️</button>
+          ` : '';
+
+          const apercuIngredients = data.ingredients && data.ingredients.length > 0 
+            ? data.ingredients.slice(0, 3).join(', ') + '...' 
+            : 'Aucun ingrédient renseigné';
+
+          const cardHTML = `
+            <article class="recipe-card" data-categories="${categoriesAttr}">
+              <div class="card-badges-container">
+                ${badgesHTML}
+              </div>
+              <img src="${data.imageUrl || defaultImg}" alt="${titreAffiche}">
+              <div class="card-body">
+                <h3>${titreAffiche}</h3>
+                <div class="card-meta">⏱️ ${tempsAffiche} | 👥 ${personnesAffiche}</div>
+                <p>${apercuIngredients}</p>
+                <div class="card-actions">
+                  <button class="btn-view" onclick="ouvrirRecette('${docSnap.id}')">Voir</button>
+                  ${adminButtons}
+                </div>
+              </div>
+            </article>
+          `;
+          grid.innerHTML += cardHTML;
+        });
+
+        initFilterEvents();
+
+      } catch (e) {
+        console.error("Erreur de chargement Firestore :", e);
+        grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color:red;">Erreur lors du chargement des recettes.</p>';
+      }
+    }
+
+    // Formulaire d'ajout / modification de recette
+    document.getElementById('recipeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const recipeId = document.getElementById('recipeId').value;
-      
-      // Extraire toutes les catégories cochées
-      const selectedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked'))
-                                     .map(cb => cb.value);
+      const selectedCategories = Array.from(document.querySelectorAll('input[name="recipeCategory"]:checked'))
+        .map(cb => cb.value);
 
-      const recipeCategories = selectedCategories.length > 0 ? selectedCategories : ["Plats"];
+      if (selectedCategories.length === 0) {
+        alert("Merci de sélectionner au moins une catégorie.");
+        return;
+      }
 
+      const recipeId = document.getElementById('editRecipeId').value;
       const recipeData = {
         titre: document.getElementById('recipeTitle').value.trim(),
-        categories: recipeCategories,
+        categories: selectedCategories,
         temps: document.getElementById('recipeTime').value.trim(),
         personnes: document.getElementById('recipeServings').value.trim(),
         imageUrl: document.getElementById('recipeImageUrl').value.trim(),
@@ -558,124 +1528,35 @@
 
       try {
         if (recipeId) {
-          // Modification
-          const docRef = doc(db, "recettes", recipeId);
-          await updateDoc(docRef, recipeData);
+          await updateDoc(doc(db, "recipes", recipeId), recipeData);
+          alert("Recette mise à jour avec succès !");
         } else {
-          // Création
+          recipeData.createdAt = serverTimestamp();
           await addDoc(recipesCollection, recipeData);
+          alert("Nouvelle recette enregistrée avec succès !");
         }
 
         resetForm();
+        document.getElementById('adminPanel').classList.remove('active');
         chargerRecettes();
       } catch (error) {
         console.error("Erreur d'enregistrement :", error);
-        alert("Erreur lors de la sauvegarde.");
+        alert("Une erreur est survenue lors de l'enregistrement.");
       }
-    }
+    });
 
-    // --- FILTRAGE DES RECETTES ---
-    function filterRecipes() {
-      const query = searchInput.value.toLowerCase().trim();
-      const cards = document.querySelectorAll('.recipe-card');
-
-      cards.forEach(card => {
-        const id = card.getAttribute('data-id');
-        const recipe = loadedRecipes.find(r => r.id === id);
-        if (!recipe) return;
-
-        const title = recipe.titre ? recipe.titre.toLowerCase() : '';
-        const ingredientsText = recipe.ingredients ? recipe.ingredients.join(' ').toLowerCase() : '';
-        const categoriesArray = Array.isArray(recipe.categories) 
-          ? recipe.categories 
-          : (recipe.categorie ? [recipe.categorie] : []);
-
-        const matchesQuery = title.includes(query) || ingredientsText.includes(query);
-        const matchesCategory = (currentCategory === 'Toutes' || categoriesArray.includes(currentCategory));
-
-        if (matchesQuery && matchesCategory) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-
-    // --- PREPARATION DE L'ÉDITION ---
-    function editerRecette(id) {
-      const recipe = loadedRecipes.find(r => r.id === id);
-      if (!recipe) return;
-
-      document.getElementById('recipeId').value = recipe.id;
-      document.getElementById('recipeTitle').value = recipe.titre || '';
-      document.getElementById('recipeTime').value = recipe.temps || '';
-      document.getElementById('recipeServings').value = recipe.personnes || '';
-      document.getElementById('recipeImageUrl').value = recipe.imageUrl || '';
-      document.getElementById('recipeIngredients').value = (recipe.ingredients || []).join('\n');
-      document.getElementById('recipeSteps').value = (recipe.etapes || []).join('\n');
-
-      const categoriesArray = Array.isArray(recipe.categories) 
-        ? recipe.categories 
-        : (recipe.categorie ? [recipe.categorie] : []);
-
-      document.querySelectorAll('.category-checkbox').forEach(cb => {
-        cb.checked = categoriesArray.includes(cb.value);
-      });
-
-      formTitle.textContent = "Modifier la Recette";
-      btnCancel.style.display = "inline-block";
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // --- SUPPRESSION D'UNE RECETTE ---
-    async function supprimerRecette(id) {
-      if (confirm("Voulez-vous vraiment supprimer cette recette ?")) {
-        try {
-          await deleteDoc(doc(db, "recettes", id));
-          chargerRecettes();
-        } catch (error) {
-          console.error("Erreur de suppression :", error);
-        }
+    // Écoute de la touche Entrée pour la validation du PIN
+    document.getElementById('pinInput').addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        verifierPin();
       }
-    }
+    });
 
-    // --- AFFICHAGE DE LA MODALE ---
-    function ouvrirRecette(id) {
-      const recipe = loadedRecipes.find(r => r.id === id);
-      if (!recipe) return;
-
-      const categoriesArray = Array.isArray(recipe.categories) 
-        ? recipe.categories 
-        : (recipe.categorie ? [recipe.categorie] : []);
-
-      modalDetails.innerHTML = `
-        <h2 style="margin-bottom: 0.5rem; color: var(--primary-color);">${recipe.titre}</h2>
-        <p style="margin-bottom: 1rem; color: #7f8c8d;">Catégories: ${categoriesArray.join(', ')}</p>
-        <img src="${recipe.imageUrl || defaultImg}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px; margin-bottom: 1rem;">
-        <p><strong>⏱️ Temps :</strong> ${recipe.temps || 'N/C'} | <strong>👥 Portions :</strong> ${recipe.personnes || 'N/C'}</p>
-        
-        <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Ingrédients</h3>
-        <ul>
-          ${(recipe.ingredients || []).map(i => `<li>${i}</li>`).join('')}
-        </ul>
-
-        <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Étapes</h3>
-        <ol style="padding-left: 1.2rem;">
-          ${(recipe.etapes || []).map(e => `<li style="margin-bottom: 0.5rem;">${e}</li>`).join('')}
-        </ol>
-      `;
-
-      modal.style.display = 'flex';
-    }
-
-    // --- REINITIALISATION DU FORMULAIRE ---
-    function resetForm() {
-      document.getElementById('recipeId').value = '';
-      recipeForm.reset();
-      document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
-      formTitle.textContent = "Ajouter une Recette";
-      btnCancel.style.display = "none";
-    }
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      chargerRecettes();
+      mettreAJourBadge();
+    });
   </script>
 </body>
 </html>
