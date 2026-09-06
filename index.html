@@ -532,6 +532,8 @@
     }
 
     .modal-actions {
+      display: flex;
+      gap: 0.5rem;
       margin-bottom: 1.5rem;
     }
 
@@ -545,9 +547,27 @@
       font-weight: 600;
     }
 
+    .btn-close-modal {
+      background-color: #7f8c8d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
     .ingredients-list, .steps-list {
       margin-left: 1.2rem;
       margin-bottom: 1.5rem;
+    }
+
+    .modal-footer-close {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
     }
 
     footer {
@@ -724,9 +744,10 @@
   <!-- Fenêtre modale : Détails de la recette -->
   <div class="modal-overlay" id="recipeModal">
     <div class="modal-content">
-      <button class="modal-close" onclick="fermerRecette()">&times;</button>
+      <button class="modal-close" onclick="fermerRecette()" title="Fermer la recette">&times;</button>
       <div class="modal-actions">
         <button class="btn-pdf" onclick="telechargerPDF()">📄 Télécharger en PDF</button>
+        <button class="btn-close-modal" onclick="fermerRecette()">✖ Fermer</button>
       </div>
       <div id="pdf-container">
         <h2 id="modalTitre">Titre</h2>
@@ -735,6 +756,9 @@
         <ul class="ingredients-list" id="modalIngredients"></ul>
         <h4>Préparation :</h4>
         <ol class="steps-list" id="modalEtapes"></ol>
+      </div>
+      <div class="modal-footer-close">
+        <button class="btn-close-modal" onclick="fermerRecette()">✖ Fermer la recette</button>
       </div>
     </div>
   </div>
@@ -1265,7 +1289,7 @@
     };
 
     // --------------------------------------------------------------------------
-    // EXPORT PDF RECETTE
+    // EXPORT PDF & FERMETURE RECETTE
     // --------------------------------------------------------------------------
     window.fermerRecette = function() {
       document.getElementById('recipeModal').classList.remove('active');
@@ -1344,7 +1368,6 @@
       document.getElementById('editRecipeId').value = recipe.id;
       document.getElementById('recipeTitle').value = recipe.titre || '';
       
-      // Gestion de la sélection multiple des catégories
       const categoriesArray = recipe.categories || (recipe.categorie ? [recipe.categorie] : ['Plats']);
       document.querySelectorAll('input[name="recipeCategory"]').forEach(cb => {
         cb.checked = categoriesArray.includes(cb.value);
@@ -1385,7 +1408,6 @@
       document.getElementById('recipeForm').reset();
       document.getElementById('editRecipeId').value = '';
       
-      // Réinitialisation par défaut des cases à cocher
       document.querySelectorAll('input[name="recipeCategory"]').forEach(cb => {
         cb.checked = (cb.value === 'Plats');
       });
@@ -1455,11 +1477,9 @@
           const tempsAffiche = data.temps || "-";
           const personnesAffiche = data.personnes || "-";
           
-          // Compatibilité rétroactive (anciennes fiches avec `categorie` unique vs nouvelles avec `categories`)
           const categoriesList = data.categories || (data.categorie ? [data.categorie] : ["Plats"]);
           const categoriesAttr = categoriesList.join(',');
 
-          // Badges visuels sur la carte
           const badgesHTML = categoriesList.map(cat => {
             const extraClass = cat === 'Réglage Airfryer' ? 'airfryer' : '';
             return `<span class="card-badge ${extraClass}">${cat}</span>`;
