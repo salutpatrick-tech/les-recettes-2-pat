@@ -376,6 +376,21 @@
       background-color: #219150;
     }
 
+    .btn-restore {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .btn-restore:hover {
+      background-color: #1f618d;
+    }
+
     .btn-change-pin {
       background-color: #e67e22;
       color: white;
@@ -600,7 +615,7 @@
 
   <!-- Bannière d'accueil -->
   <section class="hero" id="heroBanner">
-    <h2>Bienvenue dans ma cuisine !</h2>
+    2 Bienvenue dans ma cuisine !</h2>
     <p>Mes recettes maison, astuces de cuisson et tour de main au quotidien.</p>
   </section>
 
@@ -610,8 +625,12 @@
       <h3 id="formTitle">🛠️ Ajouter une nouvelle recette</h3>
       <div class="admin-header-actions">
         <button class="btn-backup" onclick="sauvegarderBDD()">💾 Sauvegarder BDD</button>
+        <button class="btn-restore" onclick="restaurerBDD()">📥 Importer BDD</button>
         <button class="btn-change-pin" onclick="changerPin()">🔑 Changer le PIN</button>
         <button class="btn-logout" onclick="logoutAdmin()">🔒 Déconnexion</button>
+        
+        <!-- Input masque pour la sélection du fichier JSON de sauvegarde -->
+        <input type="file" id="restoreFileInput" accept=".json" style="display: none;" onchange="traiterFichierRestauration(event)">
       </div>
     </div>
 
@@ -1161,7 +1180,7 @@
     };
 
     // --------------------------------------------------------------------------
-    // EXPORT JSON BDD
+    // EXPORT & IMPORT (RESTAURATION) JSON BDD
     // --------------------------------------------------------------------------
     window.sauvegarderBDD = async function() {
       if (!isAdminAuthenticated) return;
@@ -1193,6 +1212,58 @@
         console.error("Erreur lors de la sauvegarde BDD :", e);
         alert("Erreur lors de l'exportation de la base de données.");
       }
+    };
+
+    window.restaurerBDD = function() {
+      if (!isAdminAuthenticated) return;
+      document.getElementById('restoreFileInput').click();
+    };
+
+    window.traiterFichierRestauration = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const recipesData = JSON.parse(e.target.result);
+          
+          if (!Array.isArray(recipesData)) {
+            alert("Le fichier sélectionné n'a pas un format valide (un tableau de recettes est attendu).");
+            return;
+          }
+
+          if (!confirm(`Attention : Tu es sur le point d'importer ${recipesData.length} recette(s) dans ta base de données. Continuer ?`)) {
+            event.target.value = '';
+            return;
+          }
+
+          let importCount = 0;
+          for (const item of recipesData) {
+            const { id, ...dataToSave } = item;
+            dataToSave.updatedAt = serverTimestamp();
+
+            if (id) {
+              await setDoc(doc(db, "recipes", id), dataToSave, { merge: true });
+            } else {
+              dataToSave.createdAt = serverTimestamp();
+              await addDoc(recipesCollection, dataToSave);
+            }
+            importCount++;
+          }
+
+          alert(`Restauration terminée avec succès ! ${importCount} recette(s) traitée(s).`);
+          chargerRecettes();
+
+        } catch (err) {
+          console.error("Erreur lors du traitement du fichier JSON :", err);
+          alert("Erreur lors de la lecture ou de l'importation du fichier. Vérifie le format du fichier.");
+        } finally {
+          event.target.value = '';
+        }
+      };
+
+      reader.readAsText(file);
     };
 
     // --------------------------------------------------------------------------
